@@ -9,7 +9,7 @@ python -m venv .venv
 ```
 2. Activate venv with:
 ```powershell
-.\venv\Scripts\Activate.ps1
+.venv/Scripts/Activate.ps1
 ```
 Macbook Implementation
 1. Create venv with:
@@ -21,5 +21,5 @@ Macbook Implementation
 This is a test.
 ### Virtual Environment Deactivation
 ```powershell
-.\venv\Scripts\deactivate.bat
+.venv/Scripts/deactivate.bat
 ```
