@@ -18,6 +18,7 @@ Macbook Implementation
 2. Activate venv with:
 ``` source venv/bin/activate
 ```
+This is a test.
 ### Virtual Environment Deactivation
 ```powershell
 .\venv\Scripts\deactivate.bat
