@@ -1,0 +1,1 @@
+# Purpose: This script serves as the main entry point for the application. 

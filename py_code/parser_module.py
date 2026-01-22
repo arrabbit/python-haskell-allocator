@@ -1,0 +1,1 @@
+# Purpose: Contains the logic for reading and validating the input file. This module will import your IR module to instantiate the code sequences.
