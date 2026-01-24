@@ -28,8 +28,18 @@ class Token(NamedTuple):
             return TokenType.OP
         elif (char.isnumeric()):
             return TokenType.LIT
-        elif (char.isalpha()):
+        
+        # var must be lowercase AND is either a single char (not t) or t followed by one or more int
+        #elif (char.isalpha()):
+         #   return TokenType.VAR
+
+        # checks for single char var (not t)
+        elif (len(char) == 1 and char.islower() and char != "t"):
             return TokenType.VAR
+        # checks for t followed by one or more int
+        elif (char[0] == "t" and char[1:].isnumeric() and len(char) > 1):
+            return TokenType.VAR
+
         elif (char == ":"):
             return TokenType.COL
         elif (char == ","):
@@ -63,6 +73,8 @@ class Tokenizer:
         var = start_char
         while True:
             next_char = self.file.read(1)
+            # this might need to be changed because it allows a var to just be
+            # 't' when it should be 't' followed by int(s)
             if start_char.isalpha():
                 if not next_char.isalpha() or not (next_char.isalnum() or next_char == "_"):
                     if next_char: #if not eof
@@ -74,12 +86,14 @@ class Tokenizer:
                     if next_char: # if not eof
                         self.file.seek(self.file.tell() - 1) #backtrack 1 byte
                     break
+                #---Might not need this, we can assume everything is an int---
                 elif next_char == ".":
                     next_next_char = self.file.read(1)
                     if not next_next_char.isdigit():
                         self.file.close()
                         raise TypeError(f"Malformed float: .{next_next_char}")
                     self.file.seek(self.file.tell() - 1) 
+                #--------------------------------------------------------------
                 var += next_char
             elif next_char.isspace():
                 break
