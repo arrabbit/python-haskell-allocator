@@ -10,7 +10,7 @@ class TokenType(Enum):
     VAR = "variable" # each has a .name and .value attribute
     OP = "operator"
     LIT = "literal"
-    EQ = "equal"
+    EQ = "equality"
     LIV = "live"
     COL = "colon"
     COM = "comma"
@@ -119,11 +119,25 @@ tokenizer = Tokenizer("test.txt")
 tokenizer.tokenize()
 print(tokenizer)
 
-def test_determine_type():
-    var = "="
+def assert_determine_type():
+    assert Token.determine_type("live").value == "live", "'live' must be of TokenType 'live'"
+    assert Token.determine_type("+").value == "operator", "'+' must be of TokenType 'operator"
+    assert Token.determine_type("-").value == "operator", "'-' must be of TokenType 'operator'"
+    assert Token.determine_type("/").value == "operator", "'/' must be of TokenType 'operator'"
+    assert Token.determine_type("*").value == "operator", "'*' must be of TokenType 'operator'"
+    assert Token.determine_type("1").value == "literal", "'1' must be of TokenType 'literal'"
+    assert Token.determine_type("12").value == "literal", "'12' must be of TokenType 'literal'"
+    assert Token.determine_type("a").value == "variable", "'a' must be of TokenType 'variable'"
+    assert Token.determine_type("t1").value == "variable", "'t1' must be of TokenType 'variable'"
+    assert Token.determine_type("t12").value == "variable", "'t12' must be of TokenType 'variable'"
+    assert Token.determine_type(":").value == "colon", "':' must be of TokenType 'colon'"
+    assert Token.determine_type(",").value == "comma", "',' must be of TokenType 'comma'"
+    assert Token.determine_type("\n").value == "newline", "'\\n' must be of TokenType 'newline'"
+    assert Token.determine_type("=").value == "equality", "'=' must be of TokenType 'equality'"
+    print("determine_type() passes all tests!")
 
-    var_token = Token(value=var, type=Token.determine_type(var))
+assert_determine_type()
 
-    print(var_token.value, var_token.type.value)
 
-#test_determine_type()
+
+    
