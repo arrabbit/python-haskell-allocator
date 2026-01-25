@@ -71,5 +71,5 @@ class ThreeAdrInstList:
         print("Three-Address Instruction List:")
         for i, inst in enumerate(self.instructions):
             print(f"  {i}: {inst}")
-        print("Live on exit: {', '.join(self.live_on_exit)}")
+        print(f"Live on exit: {', '.join(self.live_on_exit)}")
         print("----------------------------------------")
