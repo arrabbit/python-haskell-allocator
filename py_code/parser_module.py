@@ -55,8 +55,11 @@ class Token(NamedTuple):
 class Tokenizer:
     def __init__(self, file_name: str):
         try: 
-            self.file = open(f"py_code/{file_name}")
-            self.tokens = [Token]
+            #self.file = open(f"py_code/{file_name}") #USE THIS ONE WHEN TESTING INDIVIDUALLY - ARR
+            self.file = open(file_name) #USE THIS ONE WHEN RUNNING FROM MAIN.PY - ARR
+            
+            #self.tokens = [Token] TEMP CHANGE - ARR
+            self.tokens: List[Token] = [] # List to hold Token objects TEMP CHANGE - ARR
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Tokenize input file not found: {file_name}")
 
@@ -115,9 +118,10 @@ class Tokenizer:
             if char in "+-/*=\n:,":
                 self.tokens.append(Token(value=char, type=Token.determine_type(char)))
 
-tokenizer = Tokenizer("test.txt")
+#moved to test block at end of file
+"""tokenizer = Tokenizer("test.txt")
 tokenizer.tokenize()
-print(tokenizer)
+print(tokenizer)"""
 
 def assert_determine_type():
     assert Token.determine_type("live").value == "live", "'live' must be of TokenType 'live'"
@@ -136,8 +140,18 @@ def assert_determine_type():
     assert Token.determine_type("=").value == "equality", "'=' must be of TokenType 'equality'"
     print("determine_type() passes all tests!")
 
-assert_determine_type()
+#moved to test block at end of file
+"""assert_determine_type()"""
 
+# Testing code that only executes when this module is run directly (python parser_module.py)
+# This code will not run when the module is imported (python main.py <register #> <input_file>)
+if __name__ == "__main__":
+    try:
+        tokenizer = Tokenizer("test.txt")
+        tokenizer.tokenize()
+        print(tokenizer)
 
+        assert_determine_type()
 
-    
+    except Exception as e:
+        print(f"Error during tokenization test: {e}")
