@@ -21,6 +21,12 @@ class Token(NamedTuple):
     type: TokenType
     value: str
 
+    def __str__(self):
+        if self.value == "\n":
+            return f"({self.type.value}, \\n)"
+        else:
+            return f"({self.type.value}, {self.value})"
+
     def determine_type(char: str) -> TokenType:
         if (char == "live"):
             return TokenType.LIV
@@ -28,18 +34,12 @@ class Token(NamedTuple):
             return TokenType.OP
         elif (char.isnumeric()):
             return TokenType.LIT
-        
-        # var must be lowercase AND is either a single char (not t) or t followed by one or more int
-        #elif (char.isalpha()):
-         #   return TokenType.VAR
-
         # checks for single char var (not t)
         elif (len(char) == 1 and char.islower() and char != "t"):
             return TokenType.VAR
         # checks for t followed by one or more int
         elif (char[0] == "t" and char[1:].isnumeric() and len(char) > 1):
             return TokenType.VAR
-
         elif (char == ":"):
             return TokenType.COL
         elif (char == ","):
@@ -55,66 +55,69 @@ class Token(NamedTuple):
 class Tokenizer:
     def __init__(self, file_name: str):
         try: 
-            self.file = open(f"py_code\{file_name}")
+            self.file = open(f"py_code/{file_name}")
             self.tokens = [Token]
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Tokenize input file not found: {file_name}")
 
     def __str__(self):
+        values = []
         for token in self.tokens:
-            return token
+            if type(token.value) != str:
+                continue
+            if token.value == "\n":
+                values.append("\\n")
+            else:
+                values.append(token.value)
+        return ", ".join(values)
 
-    #must fix decimal bug as well as _ in variables 
     def get_string(self, curr_pos, start_char: str) -> str:
         """
-        Returns an entire variable name or an entire number
+        Returns an entire variable name or an entire integer
         """
-        self.file.seek(curr_pos) #move ptr to curr_pos
-        var = start_char
+        str = start_char
+        is_valid = False
+        self.file.seek(curr_pos) #move ptr to curr_pos in file
         while True:
             next_char = self.file.read(1)
-            # this might need to be changed because it allows a var to just be
-            # 't' when it should be 't' followed by int(s)
-            if start_char.isalpha():
-                if not next_char.isalpha() or not (next_char.isalnum() or next_char == "_"):
-                    if next_char: #if not eof
-                        self.file.seek(self.file.tell() - 1) #backtrack 1 byte
+            if start_char.isdigit() and next_char.isdigit():
+                str += next_char
+            elif start_char == "t":
+                if next_char.isdigit():
+                    is_valid = True
+                    str += next_char
+                elif not is_valid:
+                    raise ValueError(f"Invalid variable name: {start_char + next_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
+            elif start_char.isalpha():
+                if start_char.isupper():
+                    raise ValueError(f"Invalid variable name: {start_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
+                elif not next_char.isalpha():
                     break
-                var += next_char
-            elif start_char.isdigit():
-                if not next_char.isdigit() and not next_char == ".":
-                    if next_char: # if not eof
-                        self.file.seek(self.file.tell() - 1) #backtrack 1 byte
-                    break
-                #---Might not need this, we can assume everything is an int---
-                elif next_char == ".":
-                    next_next_char = self.file.read(1)
-                    if not next_next_char.isdigit():
-                        self.file.close()
-                        raise TypeError(f"Malformed float: .{next_next_char}")
-                    self.file.seek(self.file.tell() - 1) 
-                #--------------------------------------------------------------
-                var += next_char
-            elif next_char.isspace():
+                else:
+                    raise ValueError(f"Invalid variable name: {start_char + next_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
+            if next_char == " ":
                 break
-        return var
+            if next_char == "\n":
+                self.file.seek(self.file.tell() - 1)
+                break               
+        return str
             
-    def tokenize(self) -> bool:
+    def tokenize(self):
         while True:
             char = self.file.read(1)
             if not char:
                 break
-            if char.isspace():
+            if char == " ":
                 continue
-            if char.isalpha() or char.isdigit():
+            if char.isdigit() or char.isalpha():
                 var = self.get_string(self.file.tell(), char)
                 self.tokens.append(Token(value=var, type=Token.determine_type(var)))
-        return True
+            if char in "+-/*=\n:,":
+                self.tokens.append(Token(value=char, type=Token.determine_type(char)))
 
 tokenizer = Tokenizer("test.txt")
-if tokenizer.tokenize():
-    for token in tokenizer.tokens:
-        print(token.value)
+tokenizer.tokenize()
+print(tokenizer)
 
 def test_determine_type():
     var = "="
