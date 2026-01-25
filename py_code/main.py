@@ -1,4 +1,3 @@
-# Purpose: This script serves as the main entry point for the application. 
 import sys
 from parser_module import Tokenizer, Parser
 
