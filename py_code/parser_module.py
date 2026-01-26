@@ -74,6 +74,7 @@ class Tokenizer:
                 values.append(token.value)
         return ", ".join(values)
 
+
     def get_string(self, curr_pos, start_char: str) -> str:
         """
         Returns an entire variable name or an entire integer
@@ -118,11 +119,8 @@ class Tokenizer:
             if char in "+-/*=\n:,":
                 self.tokens.append(Token(value=char, type=Token.determine_type(char)))
 
-#moved to test block at end of file
-"""tokenizer = Tokenizer("test.txt")
-tokenizer.tokenize()
-print(tokenizer)"""
 
+### --- TEST DRIVERS --- ###
 def assert_determine_type():
     assert Token.determine_type("live").value == "live", "'live' must be of TokenType 'live'"
     assert Token.determine_type("+").value == "operator", "'+' must be of TokenType 'operator"
@@ -140,8 +138,12 @@ def assert_determine_type():
     assert Token.determine_type("=").value == "equality", "'=' must be of TokenType 'equality'"
     print("determine_type() passes all tests!")
 
-#moved to test block at end of file
-"""assert_determine_type()"""
+def assert_tokenize():
+    return
+def get_string():
+    return
+def assert_tokenize():
+    return
 
 # Testing code that only executes when this module is run directly (python parser_module.py)
 # This code will not run when the module is imported (python main.py <register #> <input_file>)
