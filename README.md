@@ -23,3 +23,10 @@ This is a test.
 ```powershell
 .venv/Scripts/deactivate.bat
 ```
+
+### Build Instructions
+To run main.py, in root directory run command:
+    python py_code\main.py <register #> py_code\<input file name>
+
+To run parser_module.py, in root directory run command:
+    python py_code\parser_module.py
