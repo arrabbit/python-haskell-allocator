@@ -11,9 +11,9 @@ def main():
         tokenizer.tokenize()
         
         # Debug
-        print(f"\n[Tokens Found]:")
-        for t in tokenizer.tokens:
-            print(f"  {t}")
+        #print(f"\n[Tokens Found]:")
+        #for t in tokenizer.tokens:
+        #  print(f"  {t}")
 
         parser = Parser(tokenizer.tokens)
         ir_list = parser.parse()
