@@ -4,6 +4,7 @@
 #               second pass looks at the tokens list 
 from typing import List, NamedTuple
 from enum import Enum
+from ir_module import ThreeAdrInst, ThreeAdrInstList
 import os
 
 class TokenType(Enum):
@@ -55,11 +56,8 @@ class Token(NamedTuple):
 class Tokenizer:
     def __init__(self, file_name: str):
         try: 
-            #self.file = open(f"py_code/{file_name}") #USE THIS ONE WHEN TESTING INDIVIDUALLY - ARR
-            self.file = open(file_name) #USE THIS ONE WHEN RUNNING FROM MAIN.PY - ARR
-            
-            #self.tokens = [Token] TEMP CHANGE - ARR
-            self.tokens: List[Token] = [] # List to hold Token objects TEMP CHANGE - ARR
+            self.file = open(file_name)
+            self.tokens = [] # empty list not list of class token
         except FileNotFoundError as e:
             raise FileNotFoundError(f"Tokenize input file not found: {file_name}")
 
@@ -77,34 +75,37 @@ class Tokenizer:
 
     def get_string(self, curr_pos, start_char: str) -> str:
         """
-        Returns an entire variable name or an entire integer
+        Returns an entire alphanumeric token. 
+        Fixes the infinite loop at the end of the file.
         """
-        str = start_char
-        is_valid = False
-        self.file.seek(curr_pos) #move ptr to curr_pos in file
+        result = start_char
+        self.file.seek(curr_pos) # move ptr to after start_char
+        
         while True:
             next_char = self.file.read(1)
-            if start_char.isdigit() and next_char.isdigit():
-                str += next_char
-            elif start_char == "t":
-                if next_char.isdigit():
-                    is_valid = True
-                    str += next_char
-                elif not is_valid:
-                    raise ValueError(f"Invalid variable name: {start_char + next_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
-            elif start_char.isalpha():
-                if start_char.isupper():
-                    raise ValueError(f"Invalid variable name: {start_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
-                elif not next_char.isalpha():
-                    break
-                else:
-                    raise ValueError(f"Invalid variable name: {start_char + next_char}... Variable name must be a single lowercase letter (excluding t), or a lowercase 't' followed by an integer.")
-            if next_char == " ":
+           
+            if not next_char:
                 break
-            if next_char == "\n":
+
+            if start_char.isdigit():
+                if next_char.isdigit():
+                    result += next_char
+                else:
+                    self.file.seek(self.file.tell() - 1)
+                    break
+            
+            elif start_char.isalpha():
+                if next_char.isalnum(): 
+                    result += next_char
+                else:
+                    self.file.seek(self.file.tell() - 1)
+                    break
+            
+            else:
                 self.file.seek(self.file.tell() - 1)
-                break               
-        return str
+                break
+                
+        return result
             
     def tokenize(self):
         while True:
@@ -155,5 +156,141 @@ if __name__ == "__main__":
 
         assert_determine_type()
 
-    except Exception as e:
-        print(f"Error during tokenization test: {e}")
+#test_determine_type()
+
+class Parser:
+    def __init__(self, tokens: List[Token]):
+        self.tokens = tokens
+        self.pos = 0
+        self.ir_list = ThreeAdrInstList()
+
+    def consume(self, expected_type=None):
+        """Returns current token and moves forward. Optionally checks type."""
+        if self.pos >= len(self.tokens):
+            return None
+        token = self.tokens[self.pos]
+        if expected_type and token.type != expected_type:
+            raise ValueError(f"Expected {expected_type}, got {token.type}")
+        self.pos += 1
+        return token
+
+    def parse(self) -> ThreeAdrInstList:
+        """
+        Iterates through tokens and builds the IR list.
+        """
+        while self.pos < len(self.tokens):
+            # Peek at the current token to decide what to do
+            current_token = self.tokens[self.pos]
+
+            if current_token.type == TokenType.VAR:
+                # This is likely a standard instruction: x = ...
+                self.parse_instruction()
+            elif current_token.type == TokenType.LIV:
+                # This is the "live : a, b" line
+                self.parse_liveness()
+            elif current_token.type == TokenType.NL:
+                # Skip newlines
+                self.consume()
+            else:
+                raise ValueError(f"Unexpected token at start of line: {current_token}")
+        
+        return self.ir_list
+
+    def parse_instruction(self):
+        # Destination Variable
+        dest_token = self.consume(TokenType.VAR)
+        
+        # Assignment Operator (=)
+        self.consume(TokenType.EQ)
+
+        # We peek at the next token to see if it is an operator
+        is_unary = False
+        unary_op = None
+        
+        if self.pos < len(self.tokens) and self.tokens[self.pos].type == TokenType.OP:
+            op_token = self.consume()
+            if op_token.value == '-':
+                is_unary = True
+                unary_op = op_token.value
+            else:
+                 # Syntax error
+                raise ValueError(f"Invalid unary operator: {op_token.value}")
+
+        # First Operand (src1)
+        # In x = -y, 'y' is src1. In x = y + z, 'y' is src1.
+        if self.pos >= len(self.tokens):
+             raise ValueError("Unexpected end of line after assignment")
+             
+        src1_token = self.tokens[self.pos]
+        if src1_token.type not in (TokenType.VAR, TokenType.LIT):
+            raise ValueError(f"Expected source operand, got {src1_token.type}")
+        self.consume() # Move past src1
+
+        # Check for Binary Operation (e.g., a = b + c)
+        op_value = unary_op 
+        src2_value = None
+
+        if not is_unary and self.pos < len(self.tokens):
+            next_token = self.tokens[self.pos]
+            
+            if next_token.type == TokenType.OP:
+                # This is a binary operation: src1 OP src2
+                self.consume() # consume operator
+                op_value = next_token.value
+                
+                # Get src2
+                if self.pos >= len(self.tokens):
+                    raise ValueError("Expected second operand after operator")
+                
+                src2_token = self.tokens[self.pos]
+                if src2_token.type not in (TokenType.VAR, TokenType.LIT):
+                    raise ValueError("Expected variable or literal for second operand")
+                src2_value = src2_token.value
+                self.consume() # consume src2
+
+        # Handle Newlines 
+        if self.pos < len(self.tokens) and self.tokens[self.pos].type == TokenType.NL:
+            self.consume()
+
+        # Add to IR List
+        self.ir_list.add_instruct(
+            ThreeAdrInst(
+                dest=dest_token.value,
+                src1=src1_token.value,
+                op=op_value,
+                src2=src2_value
+            )
+        )
+
+    def parse_liveness(self):
+        self.consume(TokenType.LIV)
+        self.consume(TokenType.COL)
+
+        live_vars = []
+        expect_var = True
+
+        while self.pos < len(self.tokens):
+            token = self.tokens[self.pos]
+
+            if token.type == TokenType.NL:
+                self.consume()
+                break
+
+            if expect_var:
+                if token.type != TokenType.VAR:
+                    raise ValueError(f"Expected variable in live list, got {token.type}")
+                live_vars.append(token.value)
+                self.consume()
+                expect_var = False
+            else:
+                if token.type != TokenType.COM:
+                    raise ValueError(f"Expected comma between live variables, got {token.type}")
+                self.consume()
+                expect_var = True
+
+        if not live_vars:
+            raise ValueError("Live statement must specify at least one variable")
+        if expect_var:
+            raise ValueError("Trailing comma in live statement")
+
+        self.ir_list.set_live_on_exit(live_vars)
