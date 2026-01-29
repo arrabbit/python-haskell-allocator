@@ -4,7 +4,7 @@ Summary: This script serves as the main entry point for the application.
 Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 Date: February 26, 2024
 """
-
+from tokenizer import Tokenizer
 import sys
 import os
 
@@ -37,8 +37,6 @@ def main():
     if not os.path.isfile(infile_name):
         print(f"Error: Input file '{infile_name}' is invalid.", file=sys.stderr)
         sys.exit(1)
-
-    from parser_module import Tokenizer # Importing here to avoid issues if parser_module.py has test code
     
     # Initialize the tokenizer and tokenize the input file
     try:
