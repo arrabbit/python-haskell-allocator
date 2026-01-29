@@ -1,7 +1,7 @@
 # python-haskell-allocator
 A dual implementation (Python &amp; Haskell) of a simple compiler register allocator. Uses graph coloring to map variables to limited registers for code generation.
 
-### Virtual Environment Setup
+## Virtual Environment Setup
 Windows Implementation
 1. Create venv with:
 ```powershell
@@ -19,14 +19,24 @@ Macbook Implementation
 ``` source venv/bin/activate
 ```
 This is a test.
-### Virtual Environment Deactivation
+## Virtual Environment Deactivation
 ```powershell
 .venv/Scripts/deactivate.bat
 ```
 
-### Build Instructions
-To run main.py, in root directory run command:
-    python py_code\main.py <register #> py_code\<input file name>
+## Build Instructions
 
-To run parser_module.py, in root directory run command:
-    python py_code\parser_module.py
+### main.py
+To run `main.py`, wile in <u>py_code</u> directory, run command:
+    python main.py `num_registers` `file_name`
+
+
+##### Args:
+- `num_registers`:
+    The number of registers for the "compiler" to have access to
+- `file_name`:
+    The name of the file you want to take as input into the compiler, including the file extension
+
+### Tool Files:
+To run `parser_module.py`, while in <u>py_code</u> directory, run command:
+    python parser_module.py
