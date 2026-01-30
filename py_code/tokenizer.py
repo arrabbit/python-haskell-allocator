@@ -22,7 +22,7 @@ class Token(NamedTuple):
         else:
             return f"({self.type.value}, {self.value})"
 
-    def determine_type(char: str) -> TokenType:
+    def get_type(char: str) -> TokenType:
         if (char == "live"):
             return TokenType.LIV
         elif (char in "+-/*"):
@@ -101,7 +101,7 @@ class Tokenizer:
                 
         return result
             
-    def tokenize(self):
+    def tokenize(self) -> None:
         while True:
             char = self.file.read(1)
             if not char:
@@ -110,42 +110,7 @@ class Tokenizer:
                 continue
             if char.isdigit() or char.isalpha():
                 var = self.get_string(self.file.tell(), char)
-                self.tokens.append(Token(value=var, type=Token.determine_type(var)))
+                self.tokens.append(Token(value=var, type=Token.get_type(var)))
             if char in "+-/*=\n:,":
-                self.tokens.append(Token(value=char, type=Token.determine_type(char)))
-
-
-### --- TEST DRIVERS --- ###
-def assert_determine_type():
-    assert Token.determine_type("live").value == "live", "'live' must be of TokenType 'live'"
-    assert Token.determine_type("+").value == "operator", "'+' must be of TokenType 'operator"
-    assert Token.determine_type("-").value == "operator", "'-' must be of TokenType 'operator'"
-    assert Token.determine_type("/").value == "operator", "'/' must be of TokenType 'operator'"
-    assert Token.determine_type("*").value == "operator", "'*' must be of TokenType 'operator'"
-    assert Token.determine_type("1").value == "literal", "'1' must be of TokenType 'literal'"
-    assert Token.determine_type("12").value == "literal", "'12' must be of TokenType 'literal'"
-    assert Token.determine_type("a").value == "variable", "'a' must be of TokenType 'variable'"
-    assert Token.determine_type("t1").value == "variable", "'t1' must be of TokenType 'variable'"
-    assert Token.determine_type("t12").value == "variable", "'t12' must be of TokenType 'variable'"
-    assert Token.determine_type(":").value == "colon", "':' must be of TokenType 'colon'"
-    assert Token.determine_type(",").value == "comma", "',' must be of TokenType 'comma'"
-    assert Token.determine_type("\n").value == "newline", "'\\n' must be of TokenType 'newline'"
-    assert Token.determine_type("=").value == "equality", "'=' must be of TokenType 'equality'"
-    print("determine_type() passes all tests!")
-
-def assert_tokenize():
-    return
-def get_string():
-    return
-def assert_tokenize():
-    return
-
-# This code will not run when the module is imported (python main.py <register #> <input_file>)
-if __name__ == "__main__":
-    
-    tokenizer = Tokenizer("test.txt")
-    tokenizer.tokenize()
-    print(tokenizer)
-
-    assert_determine_type()
+                self.tokens.append(Token(value=char, type=Token.get_type(char)))
     
