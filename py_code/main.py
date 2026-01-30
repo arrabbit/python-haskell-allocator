@@ -5,6 +5,7 @@ Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 Date: February 26, 2024
 """
 from tokenizer import Tokenizer
+from parser import Parser
 import sys
 import os
 
@@ -39,13 +40,21 @@ def main():
         sys.exit(1)
     
     # Initialize the tokenizer and tokenize the input file
-    try:
+    try: #Tokenize
         tokenizer = Tokenizer(infile_name)
         tokenizer.tokenize()
-        print("Tokens identified: ")
+        print("Input tokenized successfully.")
         print(tokenizer)
     except Exception as e:
         print(f"Error during tokenization: {e}", file=sys.stderr)
+        sys.exit(1)
+    try: #Parsing
+        parser = Parser(tokenizer.tokens)
+        parser.parse()
+        print("Tokens parsed successfully.")
+        print(parser.ir_list.__print_as_str__()) # once __str__ is created in 3addrinstlist class then can be updated to print(parser.ir_list)
+    except Exception as e:
+        print(f"Error during parser: {e}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
