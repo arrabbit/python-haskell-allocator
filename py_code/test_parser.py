@@ -1,5 +1,6 @@
 import sys
-from parser_module import Tokenizer, Parser
+from tokenizer import Tokenizer
+from parser import Parser
 
 def main():
     filename = "test.txt" 
