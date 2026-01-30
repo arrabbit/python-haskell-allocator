@@ -68,8 +68,9 @@ class ThreeAdrInstList:
         """
         Return a string representation of the entire instruction list.
         """
-        print("Three-Address Instruction List:")
+        string = "Three-Address Instruction List:\n"
         for i, inst in enumerate(self.instructions):
-            print(f"  {i}: {inst}")
-        print(f"Live on exit: {', '.join(self.live_on_exit)}")
-        print("----------------------------------------")
+            string += f"  {i}: {inst}\n"
+        string += f"Live on exit: {', '.join(self.live_on_exit)}\n"
+        string += "----------------------------------------"
+        return string
