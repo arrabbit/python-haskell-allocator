@@ -52,7 +52,7 @@ def main():
         parser = Parser(tokenizer.tokens)
         parser.parse()
         print("Tokens parsed successfully.")
-        print(parser.ir_list.__print_as_str__()) # once __str__ is created in 3addrinstlist class then can be updated to print(parser.ir_list)
+        print(parser.ir_list)
     except Exception as e:
         print(f"Error during parser: {e}", file=sys.stderr)
         sys.exit(1)

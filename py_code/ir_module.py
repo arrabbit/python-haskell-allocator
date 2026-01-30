@@ -64,7 +64,7 @@ class ThreeAdrInstList:
         """
         self.live_on_exit = live_vars
 
-    def __print_as_str__(self):
+    def __str__(self):
         """
         Return a string representation of the entire instruction list.
         """
