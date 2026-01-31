@@ -52,7 +52,7 @@ def main():
         parser = Parser(tokenizer.tokens)
         parser.parse()
         print("Tokens parsed successfully.")
-        print(parser.ir_list)
+        print(parser.code_list)
     except Exception as e:
         print(f"Error during parser: {e}", file=sys.stderr)
         sys.exit(1)
