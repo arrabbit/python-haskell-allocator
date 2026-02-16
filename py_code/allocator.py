@@ -18,6 +18,7 @@ class InterferenceGraph:
     """
     def __init__(self):
         self.graph = {}
+        self.color = {}
 
     def add_node(self, var):
         if var not in self.graph:
@@ -37,6 +38,15 @@ class InterferenceGraph:
         for node, edges in self.graph.items():
             res += f"  {node}: {', '.join(edges)}\n"
         return res
+    
+    def is_safe(self, node, register): 
+        """Returns a bool checking if any neighbor of node is already assigned to register. """
+        for neighbor in self.graph.get(node, set()): 
+            if self.color.get(neighbor) == register:
+                return False    
+        return True
+    
+
     
 
 def build_interfere_graph(instruct_list):
