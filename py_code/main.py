@@ -6,6 +6,7 @@ Date: February 26, 2024
 """
 from tokenizer import Tokenizer
 from parser import Parser
+from allocator import build_interfere_graph
 import sys
 import os
 
@@ -55,6 +56,15 @@ def main():
         print(parser.code_list)
     except Exception as e:
         print(f"Error during parser: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Build the interference graph from the instruction list
+    try:
+        graph = build_interfere_graph(parser.code_list)
+        print("Interference graph built successfully.")
+        print(graph)
+    except Exception as e:
+        print(f"Error during interference graph construction: {e}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
