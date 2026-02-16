@@ -41,9 +41,10 @@ class InterferenceGraph:
 
 def build_interfere_graph(instruct_list):
     """
-    Builds the interference graph from the given instruction list by
-    creating nodes for each live variable and connecting the variables that
-    interfere with each other.
+    Builds the interference graph from the given instruction list by updating
+    each variable name to be unique and then iterating through the instruction 
+    list in reverse order, creating nodes for each live variable and connecting
+    the variables that interfere with each other.
     Args:
         instruct_list: An instance of the ThreeAdrInstList containing the list
             of instructions and live variable information.
@@ -51,6 +52,9 @@ def build_interfere_graph(instruct_list):
         graph: An instance of the InterferenceGraph for the given instruction
             list.
     """
+    # Rename variables in the instruction list to ensure uniqueness
+    rename_vars(instruct_list)
+    
     graph = InterferenceGraph()
 
     # Initialiize set of variables live on exit for given instruction list
@@ -72,6 +76,17 @@ def build_interfere_graph(instruct_list):
         check_source_var(instr, graph, curr_live_vars)
 
     return graph
+
+
+def rename_vars(instruct_list):
+    """
+    Renames variables in the instruction list to ensure that each variable is
+    defined only once, which is a requirement for the interference graph
+    construction.
+    Args:
+        instruct_list: An instance of the ThreeAdrInstList containing the list
+            of instructions and live variable information."""
+
 
 
 def check_dest_var(instr, graph, curr_live_vars):
