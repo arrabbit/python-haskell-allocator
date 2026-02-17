@@ -72,7 +72,9 @@ def main():
     if succ:
         print(f"Success! Nodes have been allocated to {num_registers} registers")
         print("\nRegister Coloring Table:")
-       # for v in graph.graph:
+        reg_table = {}
+        
+
             
 
 
