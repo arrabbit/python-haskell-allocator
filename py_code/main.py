@@ -72,6 +72,8 @@ def main():
     if succ:
         print(f"Success! Nodes have been allocated to {num_registers} registers")
         print("\nRegister Coloring Table:")
+        # 1) The coloring table
+        # 2) The Variable Interference Table 
 
 if __name__ == "__main__":
     main()
