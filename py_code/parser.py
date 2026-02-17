@@ -147,3 +147,5 @@ class Parser:
                 break
 
         return variables
+    
+    #Testing for live works regardly of if ther is a space between the live variables, you can put as many live variables as necessary 
