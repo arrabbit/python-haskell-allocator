@@ -18,7 +18,6 @@ class InterferenceGraph:
     """
     def __init__(self):
         self.graph = {}
-        self.color = {}
 
     def add_node(self, var):
         if var not in self.graph:
@@ -45,6 +44,7 @@ class InterferenceGraph:
             if self.color.get(neighbor) == register:
                 return False    
         return True
+      
     def allocate_registers(self, num_registers, color_these_nodes): #In rememberance of Mantracker
 
         #Base Case all nodes colored
@@ -67,15 +67,14 @@ class InterferenceGraph:
         # No possible coloring exists
         print(f"Failed to Color")
         return False
-
-
     
 
 def build_interfere_graph(instruct_list):
     """
-    Builds the interference graph from the given instruction list by
-    creating nodes for each live variable and connecting the variables that
-    interfere with each other.
+    Builds the interference graph from the given instruction list by updating
+    each variable name to be unique and then iterating through the instruction 
+    list in reverse order, creating nodes for each live variable and connecting
+    the variables that interfere with each other.
     Args:
         instruct_list: An instance of the ThreeAdrInstList containing the list
             of instructions and live variable information.
@@ -83,6 +82,9 @@ def build_interfere_graph(instruct_list):
         graph: An instance of the InterferenceGraph for the given instruction
             list.
     """
+    # Rename variables in the instruction list to ensure uniqueness
+    rename_vars(instruct_list)
+    
     graph = InterferenceGraph()
 
     # Initialiize set of variables live on exit for given instruction list
@@ -105,6 +107,70 @@ def build_interfere_graph(instruct_list):
 
     return graph
 
+
+def rename_vars(instruct_list):
+    """
+    Renames variables in the instruction list to ensure that each variable is
+    defined only once, which is a requirement for the interference graph
+    construction.
+    Args:
+        instruct_list: An instance of the ThreeAdrInstList containing the list
+            of instructions and live variable information.
+    """
+    
+    var_versions = {}
+    active_names = {}
+
+    for instr in instruct_list.instructions:
+        # Rename source variables
+        instr.src1 = process_var(instr.src1, var_versions, active_names)
+        instr.src2 = process_var(instr.src2, var_versions, active_names)
+
+        # Rename destination variable
+        if instr.dest:
+            # Determine new version
+            curr_version = var_versions.get(instr.dest, -1)
+            new_version = curr_version + 1
+            var_versions[instr.dest] = new_version
+
+            # Create new name and update mapping
+            new_name = f"{instr.dest}_{new_version}"
+            active_names[instr.dest] = new_name
+            
+            # Update instruction
+            instr.dest = new_name
+
+    # Update live on exit variables to their active names
+    new_live_on_exit = []
+    for var in instruct_list.live_on_exit:
+        # Process each variable to get its active name and add to the new list
+        renamed_var = process_var(var, var_versions, active_names)
+        new_live_on_exit.append(renamed_var)
+    
+    # Update the instruction list's live on exit with the new renamed variables
+    instruct_list.set_live_on_exit(new_live_on_exit)
+
+def process_var(var_name, var_versions, active_names):
+    """
+    Checks if var_name is a valid variable (not None, not literal).
+    Initializes it if live-on-entry, and returns the current active name.
+
+    Args:
+        var_name: The name of the variable to process.
+        var_versions: A dictionary mapping variable names to their current
+            version numbers.
+        active_names: A dictionary mapping variable names to their active
+            (renamed) names.
+    """
+    if var_name and not var_name.isdigit(): # Ignore None and literals
+        # Check if variable is live on entry if so, initialize it to version 0
+        if var_name not in active_names:
+            var_versions[var_name] = 0
+            active_names[var_name] = f"{var_name}_0"
+        # Return the active name for use in instruction updates
+        return active_names[var_name]
+    
+    return var_name # Return original value if None or literal
 
 def check_dest_var(instr, graph, curr_live_vars):
     """
