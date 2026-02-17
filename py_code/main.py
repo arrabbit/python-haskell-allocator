@@ -68,10 +68,10 @@ def main():
         sys.exit(1)
 
     vars = list(graph.graph.keys())
-    succ = graph.mantracker(num_registers, vars)
+    succ = graph.allocate_registers(num_registers, vars)
     if succ:
         print(f"Success! Nodes have been allocated to {num_registers} registers")
         print("\nRegister Coloring Table:")
-        
+
 if __name__ == "__main__":
     main()
