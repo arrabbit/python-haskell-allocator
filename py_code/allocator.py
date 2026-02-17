@@ -38,6 +38,36 @@ class InterferenceGraph:
             res += f"  {node}: {', '.join(edges)}\n"
         return res
     
+    def is_safe(self, node, register): 
+        """Returns a bool checking if any neighbor of node is already assigned to register. """
+        for neighbor in self.graph.get(node, set()): 
+            if self.color.get(neighbor) == register:
+                return False    
+        return True
+      
+    def allocate_registers(self, num_registers, color_these_nodes): #In rememberance of Mantracker
+
+        #Base Case all nodes colored
+        if not color_these_nodes:
+            # No more nodes to color
+            return True
+        
+        curr = color_these_nodes[0]
+        print(f"Trying to color {curr}")
+
+        for reg in range(num_registers):
+            if self.is_safe(curr, reg):
+                print(f" Assigning {curr} to reg {reg}")
+                self.color[curr] = reg
+                if self.mantracker(num_registers, color_these_nodes[1:]):
+                    # Optimal coloring for all nodes has been found
+                    return True
+                print(f"Backtracking -> Undoing {curr} from Reg {reg}")
+                del self.color[curr]
+        # No possible coloring exists
+        print(f"Failed to Color")
+        return False
+    
 
 def build_interfere_graph(instruct_list):
     """
@@ -119,7 +149,6 @@ def rename_vars(instruct_list):
     
     # Update the instruction list's live on exit with the new renamed variables
     instruct_list.set_live_on_exit(new_live_on_exit)
-
 
 def process_var(var_name, var_versions, active_names):
     """

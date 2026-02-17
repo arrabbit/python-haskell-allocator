@@ -61,17 +61,20 @@ def main():
     # Build the interference graph from the instruction list
     try:
         graph = build_interfere_graph(parser.code_list)
-        #TESTING BEGINS HERE
-
-        var = "a"
-
-        print(f"is {var} safe in register 0? {graph.is_safe(var, 0)}")
-
         print("Interference graph built successfully.")
         print(graph)
     except Exception as e:
         print(f"Error during interference graph construction: {e}", file=sys.stderr)
         sys.exit(1)
+
+    vars = list(graph.graph.keys())
+    succ = graph.mantracker(num_registers, vars)
+    if succ:
+        print(f"Success! Nodes have been allocated to {num_registers} registers")
+        print("\nRegister Coloring Table:")
+       # for v in graph.graph:
+            
+
 
 if __name__ == "__main__":
     main()
