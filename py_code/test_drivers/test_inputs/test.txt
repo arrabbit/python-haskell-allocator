@@ -1,4 +1,4 @@
 t12 = 113
 b = a + 12
 c = a + b
-live : c
+live : c,b

@@ -61,6 +61,12 @@ def main():
     # Build the interference graph from the instruction list
     try:
         graph = build_interfere_graph(parser.code_list)
+        #TESTING BEGINS HERE
+
+        var = "a"
+
+        print(f"is {var} safe in register 0? {graph.is_safe(var, 0)}")
+
         print("Interference graph built successfully.")
         print(graph)
     except Exception as e:
