@@ -45,7 +45,29 @@ class InterferenceGraph:
             if self.color.get(neighbor) == register:
                 return False    
         return True
-    
+    def allocate_registers(self, num_registers, color_these_nodes): #In rememberance of Mantracker
+
+        #Base Case all nodes colored
+        if not color_these_nodes:
+            # No more nodes to color
+            return True
+        
+        curr = color_these_nodes[0]
+        print(f"Trying to color {curr}")
+
+        for reg in range(num_registers):
+            if self.is_safe(curr, reg):
+                print(f" Assigning {curr} to reg {reg}")
+                self.color[curr] = reg
+                if self.mantracker(num_registers, color_these_nodes[1:]):
+                    # Optimal coloring for all nodes has been found
+                    return True
+                print(f"Backtracking -> Undoing {curr} from Reg {reg}")
+                del self.color[curr]
+        # No possible coloring exists
+        print(f"Failed to Color")
+        return False
+
 
     
 

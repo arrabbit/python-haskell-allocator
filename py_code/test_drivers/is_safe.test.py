@@ -6,7 +6,7 @@ Date: February 26, 2024
 """
 from tokenizer import Tokenizer
 from parser import Parser
-from allocator import build_interfere_graph
+from allocator import build_interfere_graph, InterferenceGraph
 import sys
 import os
 
@@ -61,17 +61,28 @@ def main():
     # Build the interference graph from the instruction list
     try:
         graph = build_interfere_graph(parser.code_list)
+        #TESTING BEGINS HERE
+
+        var = "a"
+        print(f"is {var} safe in register 0? {graph.is_safe(var, 0)}")
+
+        graph.add_edge("x", "y")
+        graph.add_node("z")
+
+        graph.color["x"] = 0 
+        print("Simulating node x being in register 0")
+
+        safe_0 = graph.is_safe("y", 0)
+        print(f"is 'y' safe in register 0? {safe_0}")
+        safe_1 = graph.is_safe("y", 1)
+        print(f"is 'y' safe in register 1? {safe_1}")
+        
+        # testing ends here
         print("Interference graph built successfully.")
         print(graph)
     except Exception as e:
         print(f"Error during interference graph construction: {e}", file=sys.stderr)
         sys.exit(1)
 
-    vars = list(graph.graph.keys())
-    succ = graph.mantracker(num_registers, vars)
-    if succ:
-        print(f"Success! Nodes have been allocated to {num_registers} registers")
-        print("\nRegister Coloring Table:")
-        
 if __name__ == "__main__":
     main()
