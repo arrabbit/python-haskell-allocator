@@ -19,6 +19,7 @@ class InterferenceGraph:
     def __init__(self):
         self.graph = {}
         self.color = {}
+        
     def add_node(self, var):
         if var not in self.graph:
             self.graph[var] = set()

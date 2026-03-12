@@ -36,6 +36,8 @@ class AsmOperator(Enum):
     DIV = "divide"              # DIV   src, Ri
     MVR = "move to register"    # MOV   src, Ri
     MVD = "move to destination" # MOV   Ri, dst
+    def __str__(self):
+        return self.value
 
 class AsmInst:
     """A class representing a Assembly Instruction, which is what each three-address instruction will be compiled into"""
