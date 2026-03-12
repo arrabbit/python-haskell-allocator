@@ -16,6 +16,9 @@ def generate_assembly(ir_list, colour_map, num_regs):
         "*": AsmOperator.MUL,
         "/": AsmOperator.DIV,
     }
+
+    # TODO loop through IR list and generate assembly instructions based on the
+    # IR instruction type and operands
     for instruction in ir_list.instructions:
         dest = AsmOperand(AsmOperandMode.RGD, AsmRegister(colour_map[instruction.dest]))
         if instruction.op in op_map:
@@ -26,10 +29,6 @@ def generate_assembly(ir_list, colour_map, num_regs):
             asm.add_inst(AsmInst(AsmOperator.SUB, make_operand(instruction.src1, colour_map), dest))
         else:
             asm.add_inst(AsmInst(AsmOperator.MVR, make_operand(instruction.src1, colour_map), dest))
-    
-    return asm
-    # TODO loop through IR list and generate assembly instructions based on the
-    # IR instruction type and operands
 
     # Store variables that are live-on-exit back to main memory
     asm_list = handle_live_on_exit(ir_list, colour_map, asm_list)
