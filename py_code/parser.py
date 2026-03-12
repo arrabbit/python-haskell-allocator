@@ -123,9 +123,31 @@ class Parser:
         if self.peek_current_token() and self.peek_current_token().type == TokenType.NL:
             self.get_next_token()
 
+        # Check live variables are valid (must be variables, not literals or operators)
+        self.semantic_check(live_vars)
+
         self.code_list.set_live_on_exit(live_vars)
 
+    def semantic_check(self, live_vars):
+        used_vars = set()
+        for inst in self.code_list.instructions:
+            # Add destination variable
+            if inst.dest:
+                used_vars.add(inst.dest)
+            # Add source 1 variables (ignoring int literals)
+            if inst.src1 and not inst.src1.isdigit():
+                used_vars.add(inst.src1)
+            # Add source 2 variables (ignoring int literals)
+            if inst.src2 and not inst.src2.isdigit():
+                used_vars.add(inst.src2)
+        
+        # Checks each live on exit variable is actually used in the code
+        for var in live_vars:
+            if var not in used_vars:
+                raise ValueError(
+                    f"Semantic error: Live variable '{var}' is not used in the code.")
 
+        return        
 
     def _collect_variable_list(self) -> List[str]:
         """Parses a comma-separated list of variables."""
