@@ -39,7 +39,7 @@ class AsmOperator(Enum):
 
 class AsmInst:
     """A class representing a Assembly Instruction, which is what each three-address instruction will be compiled into"""
-    def __init___(self, op: AsmOperator, src: AsmOperand, dest: AsmOperand):
+    def __init__(self, op: AsmOperator, src: AsmOperand, dest: AsmOperand):
         self.op = op        # The operation to perform
         self.src = src      # The source from which the instruction will use as an operand
         self.dest = dest    # The destination to which the instruction will write the result

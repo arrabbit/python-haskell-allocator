@@ -72,6 +72,11 @@ def main():
     if succ:
         print(f"Success! Nodes have been allocated to {num_registers} registers")
         print("\nRegister Coloring Table:")
+        for var, reg in graph.color.items():
+            print(f"  {var} -> R{reg}")
+    else:
+        print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",  file=sys.stderr)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
