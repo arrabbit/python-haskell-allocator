@@ -18,7 +18,7 @@ class InterferenceGraph:
     """
     def __init__(self):
         self.graph = {}
-
+        self.color = {}
     def add_node(self, var):
         if var not in self.graph:
             self.graph[var] = set()
@@ -59,7 +59,7 @@ class InterferenceGraph:
             if self.is_safe(curr, reg):
                 print(f" Assigning {curr} to reg {reg}")
                 self.color[curr] = reg
-                if self.mantracker(num_registers, color_these_nodes[1:]):
+                if self.allocate_registers(num_registers, color_these_nodes[1:]):
                     # Optimal coloring for all nodes has been found
                     return True
                 print(f"Backtracking -> Undoing {curr} from Reg {reg}")
