@@ -11,6 +11,23 @@ from generate import generate_assembly
 import sys
 import os
 
+def gen_assembly(code_list, color, num_registers):
+    try:
+        asm = generate_assembly(code_list, color, num_registers)
+        print("Assembly code generated successfully.")
+            
+        output_dir = "test_output"
+        out_file_path = os.path.join(output_dir, "asm_out.s")
+        with open(out_file_path, "w") as out_file:
+            out_file.write(str(asm))
+        print(f"Assembly code written to '{out_file_path}' successfully.")    
+        #print(asm) WAS USED FOR TESTING
+    except Exception as e:
+        print(f"Error during assembly generation: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    return
+
 def main():
     """
     Handles command-line arguments and initiates the tokenization process.
@@ -80,13 +97,7 @@ def main():
         sys.exit(1)
 
     # Generate assembly code from the IR list and register allocation
-    try:
-        asm = generate_assembly(parser.code_list, graph.color, num_registers)
-        print("Assembly code generated successfully.")
-        print(asm)
-    except Exception as e:
-        print(f"Error during assembly generation: {e}", file=sys.stderr)
-        sys.exit(1)
+    gen_assembly(parser.code_list, graph.color, num_registers)
 
 if __name__ == "__main__":
     main()
