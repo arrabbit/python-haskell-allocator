@@ -19,6 +19,9 @@ def generate_assembly(ir_list, colour_map, num_regs):
     # TODO loop through IR list and generate assembly instructions based on the
     # IR instruction type and operands
 
+    # Store variables that are live-on-exit back to main memory
+    asm_list = handle_live_on_exit(ir_list, colour_map, asm_list)
+
     return asm_list
 
 def make_operand(value_str, colour_map):
@@ -30,11 +33,27 @@ def make_operand(value_str, colour_map):
     
     # Check if it's an immediate value (integer)
     if value_str.isdigit() or (value_str.startswith('-') and value_str[1:].isdigit()):
-        return AsmOperand(AsmOperandMode.IMMEDIATE, int(value_str))
-    # If it's a variable, look up it's assigned register in the colour map
+        return AsmOperand(AsmOperandMode.IMM, int(value_str))
+    # If it's a variable, look up its assigned register in the colour map
     else:
         if value_str in colour_map:
             reg_num = colour_map[value_str]
-            return AsmOperand(AsmOperandMode.REGISTER, AsmRegister(reg_num))
+            return AsmOperand(AsmOperandMode.RGD, AsmRegister(reg_num))
         else:
-            return AsmOperand(AsmOperandMode.VARIABLE, AsmVariable(value_str))
+            return AsmOperand(AsmOperandMode.ABS, AsmVariable(value_str))
+        
+def handle_live_on_exit(ir_list, colour_map, asm_list):
+    for live_var in ir_list.live_on_exit:
+        # Get the register it currently lives in
+        if live_var in colour_map:
+            reg_num = colour_map[live_var]
+            src_reg = AsmOperand(AsmOperandMode.RGD, AsmRegister(reg_num))
+            
+            # Create memory destination
+            dest_mem = AsmOperand(AsmOperandMode.ABS, AsmVariable(live_var, live_var))
+
+            # MOV R_i, dest
+            store_inst = AsmInst(AsmOperator.MVD, src_reg, dest_mem)
+            asm_list.add_inst(store_inst)
+    
+    return asm_list
