@@ -30,12 +30,12 @@ class AsmOperand:
         return str(self.val)
 
 class AsmOperator(Enum):
-    ADD = "add"                 # ADD   src, Ri
-    SUB = "subtract"            # SUB   src, Ri    
-    MUL = "multiply"            # MUL   src, Ri
-    DIV = "divide"              # DIV   src, Ri
-    MVR = "move to register"    # MOV   src, Ri
-    MVD = "move to destination" # MOV   Ri, dst
+    ADD = "ADD"             # ADD   src, Ri
+    SUB = "SUB"             # SUB   src, Ri    
+    MUL = "MUL"             # MUL   src, Ri
+    DIV = "DIV"             # DIV   src, Ri
+    MVR = "MVR"             # MOV   src, Ri
+    MVD = "MVD"             # MOV   Ri, dst
     def __str__(self):
         return self.value
 
