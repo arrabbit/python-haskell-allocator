@@ -15,3 +15,10 @@ def generate_assembly(ir_list, colour_map, num_regs):
     # IR instruction type and operands
 
     return asm_list
+
+def make_operand(value_str):
+    # TODO convert a string representing an operand into an AsmOperand object
+    # by checking if the string is a variable, register, or immediate value
+    # pass
+
+    return None #delete later
