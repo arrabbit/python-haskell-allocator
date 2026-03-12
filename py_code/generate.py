@@ -10,7 +10,12 @@ from target import AsmInstList, AsmInst, AsmOperator, AsmOperand, AsmOperandMode
 def generate_assembly(ir_list, colour_map, num_regs):
     # Initialize assembly instruction list
     asm_list = AsmInstList(num_regs)
-
+    op_map = {
+        "+": AsmOperator.ADD,
+        "-": AsmOperator.SUB,
+        "*": AsmOperator.MUL,
+        "/": AsmOperator.DIV,
+    }
     # TODO loop through IR list and generate assembly instructions based on the
     # IR instruction type and operands
 
