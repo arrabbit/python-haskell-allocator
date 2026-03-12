@@ -61,10 +61,10 @@ class AsmInstList:
             self.num_regs = num_regs    # The number of available registers. Each must be stored back
 
     def __str__(self):
-        string = "Assembly Instruction List:\n"
+        string = ""
         for i, inst in enumerate(self.instructions):
-            string += f"    {i}: {str(inst)}\n"
-        string += "----------------------------------------"
+            string += f"    {str(inst)}\n"
+        string += ""
         return string
     
     def add_inst(self, inst: AsmInst):
