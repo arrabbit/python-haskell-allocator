@@ -31,9 +31,9 @@ def generate_assembly(ir_list, colour_map, num_regs):
             asm.add_inst(AsmInst(AsmOperator.MVR, make_operand(instruction.src1, colour_map), dest))
 
     # Store variables that are live-on-exit back to main memory
-    asm_list = handle_live_on_exit(ir_list, colour_map, asm_list)
+    asm = handle_live_on_exit(ir_list, colour_map, asm)
 
-    return asm_list
+    return asm
 
 def make_operand(value_str, colour_map):
     # Converts a string representing an operand into an AsmOperand object
@@ -51,7 +51,7 @@ def make_operand(value_str, colour_map):
             reg_num = colour_map[value_str]
             return AsmOperand(AsmOperandMode.RGD, AsmRegister(reg_num))
         else:
-            return AsmOperand(AsmOperandMode.ABS, AsmVariable(value_str))
+            return AsmOperand(AsmOperandMode.ABS, AsmVariable(value_str, value_str))
         
 def handle_live_on_exit(ir_list, colour_map, asm_list):
     for live_var in ir_list.live_on_exit:
@@ -63,7 +63,7 @@ def handle_live_on_exit(ir_list, colour_map, asm_list):
             # Create memory destination
             dest_mem = AsmOperand(AsmOperandMode.ABS, AsmVariable(live_var, live_var))
 
-            # MOV R_i, dest
+            # MOV Ri, dest
             store_inst = AsmInst(AsmOperator.MVD, src_reg, dest_mem)
             asm_list.add_inst(store_inst)
     

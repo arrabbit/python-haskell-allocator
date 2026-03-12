@@ -7,6 +7,7 @@ Date: February 26, 2024
 from tokenizer import Tokenizer
 from parser import Parser
 from allocator import build_interfere_graph
+from generate import generate_assembly
 import sys
 import os
 
@@ -76,6 +77,15 @@ def main():
             print(f"  {var} -> R{reg}")
     else:
         print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",  file=sys.stderr)
+        sys.exit(1)
+
+    # Generate assembly code from the IR list and register allocation
+    try:
+        asm = generate_assembly(parser.code_list, graph.color, num_registers)
+        print("Assembly code generated successfully.")
+        print(asm)
+    except Exception as e:
+        print(f"Error during assembly generation: {e}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == "__main__":
