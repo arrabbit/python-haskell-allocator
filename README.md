@@ -27,7 +27,7 @@ This is a test.
 ## Build Instructions
 
 ### main.py
-To run `main.py`, wile in <u>py_code</u> directory, run command:
+To run `main.py`, while in <u>py_code</u> directory, run command:
     python main.py `num_registers` `file_name`
 
 

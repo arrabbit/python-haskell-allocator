@@ -129,6 +129,8 @@ class Parser:
         self.code_list.set_live_on_exit(live_vars)
 
     def semantic_check(self, live_vars):
+        """Performs semantic checks on the live variables to ensure they are
+        actually used in the code."""
         used_vars = set()
         for inst in self.code_list.instructions:
             # Add destination variable
