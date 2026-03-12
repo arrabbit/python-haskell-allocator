@@ -11,7 +11,7 @@ from generate import generate_assembly
 import sys
 import os
 
-def gen_assembly(code_list, color, num_registers):
+def gen_output(code_list, color, num_registers):
     try:
         asm = generate_assembly(code_list, color, num_registers)
         print("Assembly code generated successfully.")
@@ -97,7 +97,7 @@ def main():
         sys.exit(1)
 
     # Generate assembly code from the IR list and register allocation
-    gen_assembly(parser.code_list, graph.color, num_registers)
+    gen_output(parser.code_list, graph.color, num_registers)
 
 if __name__ == "__main__":
     main()
