@@ -155,12 +155,17 @@ class Parser:
         """Parses a comma-separated list of variables."""
         variables = []
 
-        # The list must contain at least one variable
+        # Checks for zero instructions in input file
+        token = self.peek_current_token()
+        # If token is empty or not a variable ('/n'), return empty list
+        if token == None or token.type != TokenType.VAR:
+            return variables
+
+        # There is at least one variable, parse and add to list
         first = self.get_next_token(TokenType.VAR)
         variables.append(first.value)
 
         # Continue as long as we find commas separating variables
-
         while True:
             token = self.peek_current_token()
             if token and token.type == TokenType.COM:

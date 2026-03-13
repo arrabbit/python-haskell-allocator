@@ -28,14 +28,16 @@ This is a test.
 
 ### main.py
 To run `main.py`, while in <u>py_code</u> directory, run command:
-    python main.py `num_registers` `file_name`
+    python main.py `num_registers` test_drivers/test_inputs/`file_name`
 
 
 ##### Args:
 - `num_registers`:
     The number of registers for the "compiler" to have access to
+    Ex. '3'
 - `file_name`:
     The name of the file you want to take as input into the compiler, including the file extension
+    Ex. 'test.txt'
 
 ### Tool Files:
 To run `parser_module.py`, while in <u>py_code</u> directory, run command:
