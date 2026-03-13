@@ -46,13 +46,16 @@ def generate_assembly(ir_list, colour_map, num_regs):
     asm = handle_live_on_entry(ir_list, colour_map, asm)
     for instruction in ir_list.instructions:
         dest = AsmOperand(AsmOperandMode.RGD, AsmRegister(colour_map[instruction.dest]))
-        if instruction.op in op_map:
-            asm.add_inst(AsmInst(AsmOperator.MVR, make_operand(instruction.src1, colour_map), dest))
-            asm.add_inst(AsmInst(op_map[instruction.op], make_operand(instruction.src2, colour_map), dest))
-        elif instruction.op:
+        if instruction.op and instruction.src2 is None:
+            # Unary negation: dest = 0 - src1
             asm.add_inst(AsmInst(AsmOperator.MVR, AsmOperand(AsmOperandMode.IMM, 0), dest))
             asm.add_inst(AsmInst(AsmOperator.SUB, make_operand(instruction.src1, colour_map), dest))
+        elif instruction.op in op_map:
+            # Binary operation: dest = src1 op src2
+            asm.add_inst(AsmInst(AsmOperator.MVR, make_operand(instruction.src1, colour_map), dest))
+            asm.add_inst(AsmInst(op_map[instruction.op], make_operand(instruction.src2, colour_map), dest))
         else:
+            # Simple assignment: dest = src1
             asm.add_inst(AsmInst(AsmOperator.MVR, make_operand(instruction.src1, colour_map), dest))
 
     # Store variables that are live-on-exit back to main memory
