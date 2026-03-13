@@ -4,24 +4,19 @@ Summary: This script serves as the main entry point for the application.
 Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 Date: February 26, 2024
 """
+
 from tokenizer import Tokenizer
 from parser import Parser
-from allocator import build_interfere_graph
+from allocator import build_interfere_graph, display_name
 from generate import generate_assembly
 import sys
 import os
 
-def gen_output(code_list, color, num_registers):
+def gen_output(code_list, color, num_registers, out_file_path):
     try:
         asm = generate_assembly(code_list, color, num_registers)
-        print("Assembly code generated successfully.")
-            
-        output_dir = "test_output"
-        out_file_path = os.path.join(output_dir, "asm_out.s")
         with open(out_file_path, "w") as out_file:
             out_file.write(str(asm))
-        print(f"Assembly code written to '{out_file_path}' successfully.")    
-        #print(asm) WAS USED FOR TESTING
     except Exception as e:
         print(f"Error during assembly generation: {e}", file=sys.stderr)
         sys.exit(1)
@@ -62,16 +57,16 @@ def main():
     try: #Tokenize
         tokenizer = Tokenizer(infile_name)
         tokenizer.tokenize()
-        print("Input tokenized successfully.")
-        print(tokenizer)
+        # print("Input tokenized successfully.")
+        # print(tokenizer)
     except Exception as e:
         print(f"Error during tokenization: {e}", file=sys.stderr)
         sys.exit(1)
     try: #Parsing
         parser = Parser(tokenizer.tokens)
         parser.parse()
-        print("Tokens parsed successfully.")
-        print(parser.code_list)
+        # print("Tokens parsed successfully.")
+        # print(parser.code_list)
     except Exception as e:
         print(f"Error during parser: {e}", file=sys.stderr)
         sys.exit(1)
@@ -79,7 +74,7 @@ def main():
     # Build the interference graph from the instruction list
     try:
         graph = build_interfere_graph(parser.code_list)
-        print("Interference graph built successfully.")
+        # print("Interference graph built successfully.")
         print(graph)
     except Exception as e:
         print(f"Error during interference graph construction: {e}", file=sys.stderr)
@@ -88,16 +83,22 @@ def main():
     vars = list(graph.graph.keys())
     succ = graph.allocate_registers(num_registers, vars)
     if succ:
-        print(f"Success! Nodes have been allocated to {num_registers} registers")
-        print("\nRegister Coloring Table:")
+        print("Register Colouring Table:")
+        reg_to_vars = {}
         for var, reg in graph.color.items():
-            print(f"  {var} -> R{reg}")
+            reg_to_vars.setdefault(reg, []).append(display_name(var))
+        for reg in range(num_registers):
+            print(f"  R{reg}: {', '.join(reg_to_vars.get(reg, []))}")
+
     else:
-        print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",  file=sys.stderr)
+        #print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",  file=sys.stderr)
+        print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.")
+
         sys.exit(1)
 
     # Generate assembly code from the IR list and register allocation
-    gen_output(parser.code_list, graph.color, num_registers)
+    out_file_path = os.path.join("test_output", os.path.splitext(os.path.basename(infile_name))[0] + '.s')
+    gen_output(parser.code_list, graph.color, num_registers, out_file_path)
 
 if __name__ == "__main__":
     main()

@@ -4,7 +4,11 @@ Summary: Handles the logic for 'liveness' analysis and constructs the interferen
 Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 Date:
 """
-
+def display_name(var):
+    """Strip internal version suffix for display (e.g. 'b_0' -> 'b')."""
+    if '_' in var:
+        return var.rsplit('_', 1)[0]
+    return var
 class InterferenceGraph:
     """
     Interference graph for register allocation.
@@ -33,14 +37,23 @@ class InterferenceGraph:
             self.graph[var2].add(var1)
 
     def __str__(self):
-        """ Returns a string representation of interfering vairables in the graph. """
-        res = "Interference Graph:\n"
+        """ Returns a string representation of interfering vairables in the graph.  """
+        res = "Variable Interference Table:\n"
+        merged = {}
         for node, edges in self.graph.items():
-            res += f"  {node}: {', '.join(edges)}\n"
+            name = display_name(node)
+            if name not in merged:
+                merged[name] = set()
+            for edge in edges:
+                edge_name = display_name(edge)
+                if edge_name != name:
+                    merged[name].add(edge_name)
+        for name, edges in merged.items():
+            res += f"  {name}: {', '.join(sorted(edges))}\n"
         return res
-    
+        
     def is_safe(self, node, register): 
-        """Returns a bool checking if any neighbor of node is already assigned to register. """
+        """Returns a bool checking if any neighbor of node is already assigned to register."""
         for neighbor in self.graph.get(node, set()): 
             if self.color.get(neighbor) == register:
                 return False    
@@ -54,19 +67,16 @@ class InterferenceGraph:
             return True
         
         curr = color_these_nodes[0]
-        print(f"Trying to color {curr}")
 
         for reg in range(num_registers):
             if self.is_safe(curr, reg):
-                print(f" Assigning {curr} to reg {reg}")
                 self.color[curr] = reg
                 if self.allocate_registers(num_registers, color_these_nodes[1:]):
                     # Optimal coloring for all nodes has been found
                     return True
-                print(f"Backtracking -> Undoing {curr} from Reg {reg}")
                 del self.color[curr]
         # No possible coloring exists
-        print(f"Failed to Color")
+       
         return False
     
 
@@ -105,6 +115,11 @@ def build_interfere_graph(instruct_list):
         
         # Check source variables
         check_source_var(instr, graph, curr_live_vars)
+     # Add edges between all live-on-entry variables (co-live at block entry)
+    live_entry_list = list(curr_live_vars)
+    for i in range(len(live_entry_list)):
+        for j in range(i + 1, len(live_entry_list)):
+            graph.add_edge(live_entry_list[i], live_entry_list[j])
 
     return graph
 

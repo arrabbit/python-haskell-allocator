@@ -6,6 +6,30 @@ Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 Date: February 26, 2024
 """
 from target import AsmInstList, AsmInst, AsmOperator, AsmOperand, AsmOperandMode, AsmRegister, AsmVariable
+from allocator import display_name
+
+def handle_live_on_entry(ir_list, colour_map, asm_list):
+    defined = set()
+    live_on_entry = []
+    for instruction in ir_list.instructions:
+        if instruction.src1 and not instruction.src1.isdigit():
+            if instruction.src1 not in defined:
+                live_on_entry.append(instruction.src1)
+                defined.add(instruction.src1)
+        if instruction.src2 and not instruction.src2.isdigit():
+            if instruction.src2 not in defined:
+                live_on_entry.append(instruction.src2)
+                defined.add(instruction.src2)
+        if instruction.dest:
+            defined.add(instruction.dest)
+    for var in live_on_entry:
+        if var in colour_map:
+            reg_num = colour_map[var]
+            src_mem = AsmOperand(AsmOperandMode.ABS, AsmVariable(display_name(var), display_name(var)))
+            dest_reg = AsmOperand(AsmOperandMode.RGD, AsmRegister(reg_num))
+            asm_list.add_inst(AsmInst(AsmOperator.MVR, src_mem, dest_reg))
+    return asm_list
+
 
 def generate_assembly(ir_list, colour_map, num_regs):
     # Initialize assembly instruction list
@@ -19,6 +43,7 @@ def generate_assembly(ir_list, colour_map, num_regs):
 
     # TODO loop through IR list and generate assembly instructions based on the
     # IR instruction type and operands
+    asm = handle_live_on_entry(ir_list, colour_map, asm)
     for instruction in ir_list.instructions:
         dest = AsmOperand(AsmOperandMode.RGD, AsmRegister(colour_map[instruction.dest]))
         if instruction.op in op_map:
@@ -61,7 +86,9 @@ def handle_live_on_exit(ir_list, colour_map, asm_list):
             src_reg = AsmOperand(AsmOperandMode.RGD, AsmRegister(reg_num))
             
             # Create memory destination
-            dest_mem = AsmOperand(AsmOperandMode.ABS, AsmVariable(live_var, live_var))
+            dest_mem = AsmOperand(AsmOperandMode.ABS, AsmVariable(display_name(live_var), display_name(live_var)))
+
+
 
             # MOV Ri, dest
             store_inst = AsmInst(AsmOperator.MVD, src_reg, dest_mem)

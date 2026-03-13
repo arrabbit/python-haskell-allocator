@@ -27,6 +27,8 @@ class AsmOperand:
         self.val = val
 
     def __str__(self):
+        if self.mode == AsmOperandMode.IMM:
+            return f"#{self.val}"
         return str(self.val)
 
 class AsmOperator(Enum):
@@ -34,8 +36,8 @@ class AsmOperator(Enum):
     SUB = "SUB"             # SUB   src, Ri    
     MUL = "MUL"             # MUL   src, Ri
     DIV = "DIV"             # DIV   src, Ri
-    MVR = "MVR"             # MOV   src, Ri
-    MVD = "MVD"             # MOV   Ri, dst
+    MVR = "MOV"             # MOV   src, Ri
+    MVD = "MOV"             # MOV   Ri, dst
     def __str__(self):
         return self.value
 
@@ -63,7 +65,7 @@ class AsmInstList:
     def __str__(self):
         string = ""
         for i, inst in enumerate(self.instructions):
-            string += f"    {str(inst)}\n"
+            string += f"{str(inst)}\n"
         string += ""
         return string
     

@@ -1,0 +1,4 @@
+t1 = a + b
+t2 = t1 * c
+d = t2 - a
+live: d
