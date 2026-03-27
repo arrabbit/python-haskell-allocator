@@ -1,3 +1,11 @@
+"""
+Summary: Handles lexical analysis of the input file, converting raw characters
+    into a sequence of typed tokens for use by the parser.
+
+Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+Date: March 27, 2026
+"""
+
 from typing import NamedTuple
 from enum import Enum
 

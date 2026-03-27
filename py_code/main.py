@@ -1,9 +1,12 @@
-""" 
-Summary: This script serves as the main entry point for the application.
+"""
+Summary: Main entry point for the application. Handles command-line arguments
+    and orchestrates tokenization, parsing, graph construction, register
+    allocation, and assembly code generation.
 
 Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
-Date: February 26, 2024
+Date: February 26, 2026
 """
+
 from tokenizer import Tokenizer
 from parser import Parser
 from allocator import build_interfere_graph

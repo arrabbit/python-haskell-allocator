@@ -1,9 +1,9 @@
-""" 
-Summary: dedicated strictly to the classes and support routines
-    for three-address instructions. It should not contain unrelated logic.
+"""
+Summary: Dedicated strictly to the classes and support routines for
+    three-address instructions. It should not contain unrelated logic.
 
 Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
-Date: February 26, 2024
+Date: February 26, 2026
 """
 
 class ThreeAdrInst:

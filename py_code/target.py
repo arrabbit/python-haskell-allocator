@@ -1,4 +1,12 @@
-# Purpose: Assembly instruction classes and their manipulation routines.
+"""
+Summary: Assembly instruction classes and their manipulation routines.
+    Defines the data structures for representing target architecture
+    operands, operators, instructions, and instruction lists.
+
+Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+Date: March 27, 2026
+"""
+
 from enum import Enum
 
 class AsmOperandMode(Enum):

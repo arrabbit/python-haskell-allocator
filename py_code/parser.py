@@ -1,10 +1,10 @@
-""" 
-
-Summary: The Parser. Translates tokens into instructions.
-
-         Refactored for modularity and readability.
-
 """
+Summary: The Parser. Translates tokens into three-address instructions.
+
+Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+Date: March 27, 2026
+"""
+
 from typing import List, Optional, Tuple
 from interm_rep import ThreeAdrInst, ThreeAdrInstList
 from tokenizer import TokenType, Token
