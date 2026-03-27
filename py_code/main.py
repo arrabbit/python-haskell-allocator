@@ -15,6 +15,18 @@ import sys
 import os
 
 def gen_output(code_list, color, num_registers):
+    """
+    Generates assembly code from the IR list and writes it to an
+    output file.
+    Args:
+        code_list: A ThreeAdrInstList containing the parsed
+            intermediate representation.
+        color: A dictionary mapping variable names to assigned
+            register numbers.
+        num_registers: The number of available CPU registers.
+    Returns:
+        None
+    """
     try:
         asm = generate_assembly(code_list, color, num_registers)
         print("Assembly code generated successfully.")
@@ -33,7 +45,13 @@ def gen_output(code_list, color, num_registers):
 
 def main():
     """
-    Handles command-line arguments and initiates the tokenization process.
+    Main entry point. Validates command-line arguments, then
+    orchestrates tokenization, parsing, interference graph
+    construction, register allocation, and assembly code
+    generation.
+
+    Returns:
+        None
     """
     # Check for correct number of command-line arguments
     #       (Ex. main.py <register #> <input_file>)

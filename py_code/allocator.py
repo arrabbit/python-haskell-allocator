@@ -17,15 +17,36 @@ class InterferenceGraph:
     space in a 2D array.
     """
     def __init__(self):
+        """
+        Initializes an empty InterferenceGraph with no nodes or
+        colour assignments.
+        """
         self.graph = {}
         self.color = {}
         
     def add_node(self, var):
+        """
+        Adds a variable as a node in the interference graph if it
+        does not already exist.
+        Args:
+            var: The variable name (str) to add as a node.
+        Returns:
+            None
+        """
         if var not in self.graph:
             self.graph[var] = set()
 
     def add_edge(self, var1, var2):
-        """Adds an interference edge between two given variables."""
+        """
+        Adds an undirected interference edge between two variables.
+        Creates nodes for either variable if they do not already exist.
+        No edge is added if both variables are the same.
+        Args:
+            var1: The first variable name (str).
+            var2: The second variable name (str).
+        Returns:
+            None
+        """
         if var1 != var2:
             self.add_node(var1)
             self.add_node(var2)
@@ -33,21 +54,47 @@ class InterferenceGraph:
             self.graph[var2].add(var1)
 
     def __str__(self):
-        """ Returns a string representation of interfering vairables in the graph. """
+        """
+        Returns a formatted string representation of the interference
+        graph, listing each node and its interfering variables.
+        Returns:
+            str: The graph formatted with one node per line, showing
+                each variable and its comma-separated neighbours.
+        """
         res = "Interference Graph:\n"
         for node, edges in self.graph.items():
             res += f"  {node}: {', '.join(edges)}\n"
         return res
     
     def is_safe(self, node, register): 
-        """Returns a bool checking if any neighbor of node is already assigned to register. """
+        """
+        Checks whether assigning the given register to the given node
+        would conflict with any of its neighbours' current assignments.
+        Args:
+            node: The variable name (str) to check.
+            register: The register number (int) being considered.
+        Returns:
+            bool: True if no neighbour of the node is already assigned
+                to the given register, False otherwise.
+        """
         for neighbor in self.graph.get(node, set()): 
             if self.color.get(neighbor) == register:
                 return False    
         return True
       
     def allocate_registers(self, num_registers, color_these_nodes): #In rememberance of Mantracker
-
+        """
+        Attempts to assign registers to all nodes using recursive
+        backtracking graph colouring.
+        Args:
+            num_registers: The number of available CPU registers
+                (colours).
+            color_these_nodes: A list of variable name strings still
+                to be coloured.
+        Returns:
+            bool: True if a valid colouring was found for all nodes,
+                False otherwise.
+        """
         #Base Case all nodes colored
         if not color_these_nodes:
             # No more nodes to color
@@ -154,14 +201,17 @@ def rename_vars(instruct_list):
 def process_var(var_name, var_versions, active_names):
     """
     Checks if var_name is a valid variable (not None, not literal).
-    Initializes it if live-on-entry, and returns the current active name.
-
+    Initializes it if live-on-entry, and returns the current active
+    name.
     Args:
         var_name: The name of the variable to process.
-        var_versions: A dictionary mapping variable names to their current
-            version numbers.
-        active_names: A dictionary mapping variable names to their active
-            (renamed) names.
+        var_versions: A dictionary mapping variable names to their
+            current version numbers.
+        active_names: A dictionary mapping variable names to their
+            active (renamed) names.
+    Returns:
+        str: The active (renamed) variable name, or the original
+            value if it is None or a literal.
     """
     if var_name and not var_name.isdigit(): # Ignore None and literals
         # Check if variable is live on entry if so, initialize it to version 0
@@ -192,7 +242,6 @@ def check_dest_var(instr, graph, curr_live_vars):
         # The defined variable is no longer live before this instruction
         if instr.dest in curr_live_vars:
             curr_live_vars.remove(instr.dest)
-
 
 def check_source_var(instr, graph, curr_live_vars):
     """
