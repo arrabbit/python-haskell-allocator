@@ -82,7 +82,7 @@ class InterferenceGraph:
                 return False    
         return True
       
-    def allocate_registers(self, num_registers, color_these_nodes): #In rememberance of Mantracker
+    def allocate_registers(self, num_registers, color_these_nodes): #In remembrance of Mantracker
         """
         Attempts to assign registers to all nodes using recursive
         backtracking graph colouring.
