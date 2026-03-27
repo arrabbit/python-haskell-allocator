@@ -12,13 +12,30 @@ from tokenizer import TokenType, Token
 
 class Parser:
     def __init__(self, tokens: List[Token]):
+        """
+        Initializes the Parser with a list of tokens.
+        Args:
+            tokens: A list of Token objects produced by the Tokenizer.
+        """
         self.tokens = tokens
         self.pos = 0
         self.code_list = ThreeAdrInstList()
 
     def get_next_token(self, expected_type=None):
-        """Advances the parser and validates the current token type."""
-       
+        """
+        Advances the parser position and returns the current token,
+        optionally validating its type.
+        Args:
+            expected_type: The expected TokenType. If provided and the
+                current token does not match, a ValueError is raised.  
+        Returns:
+            Token: The consumed token, or None if at end of input and
+                no expected_type was specified.
+        Raises:
+            ValueError: If the current token type does not match
+                expected_type, or if the end of input is reached when
+                a specific type was expected.
+        """
         if self.pos >= len(self.tokens):
             if expected_type:
                 raise ValueError(f"Unexpected end of file. Expected {expected_type}")
@@ -32,13 +49,25 @@ class Parser:
         return token
 
     def peek_current_token(self):
-        """Returns the current token without consuming it."""
+        """
+        Returns the current token without advancing the parser position.
+        Returns:
+            Token: The current token, or None if at end of input.
+        """
         if self.pos >= len(self.tokens):
             return None
         return self.tokens[self.pos]
 
     def parse(self) -> ThreeAdrInstList:
-        """Main loop: Delegates token processing to specific handlers."""
+        """
+        Parses the full token list into a ThreeAdrInstList by delegating
+        to specific handler methods based on token type.
+        Returns:
+            ThreeAdrInstList: The populated instruction list including
+                live-on-exit variable information.
+        Raises:
+            ValueError: If an unexpected token is encountered.
+        """
         while self.pos < len(self.tokens):
             token = self.peek_current_token()
             if token.type == TokenType.VAR:
@@ -55,9 +84,14 @@ class Parser:
 
         return self.code_list
 
-
     def handle_math_instruction(self):
-        """Parses a standard assignment instruction (e.g., x = y + z)."""
+        """
+        Parses a standard assignment instruction and adds it to the
+        code list. Handles binary (x = y + z), unary (x = -y), and
+        simple assignment (x = 10) forms.
+        Returns:
+            None
+        """
         dest = self.get_next_token(TokenType.VAR).value
         self.get_next_token(TokenType.EQ)
 
@@ -70,14 +104,20 @@ class Parser:
 
         self.code_list.add_instruct(ThreeAdrInst(dest, src1, op, src2))
 
-
-
     def _parse_first_operand(self) -> Tuple[Optional[str], str]:
-        """Parses the first operand, handling optional unary negation."""
+        """
+        Parses the first operand on the right-hand side of an
+        assignment, handling optional unary negation.
+        Returns:
+           tuple: A pair (unary_op, src1) where unary_op is '-' if
+                a unary minus was found (None otherwise) and src1 is
+                the operand value as a string.
+        Raises:
+            ValueError: If the token is not a variable or literal.
+        """
         unary_op = None
         current = self.peek_current_token()
 
-        
         # Check for unary minus (e.g. -b) before consuming the operand
         if current and current.type == TokenType.OP and current.value == '-':
             unary_op = self.get_next_token().value
@@ -88,10 +128,22 @@ class Parser:
 
         return unary_op, src1_token.value
 
-
-
     def _parse_second_operand(self, existing_op) -> Tuple[Optional[str], Optional[str]]:
-        """Parses the optional second operand (e.g., + c) for binary operations."""
+        """
+        Parses the optional binary operator and second operand
+        (e.g., + c). If a unary operator was already found, returns
+        it without consuming further tokens.
+        Args:
+            existing_op: A unary operator string ('-') if one was
+                already parsed, or None.
+        Returns:
+            tuple: A pair (operator, src2) where operator is the
+                operation string and src2 is the second operand value,
+                or (None, None) for simple assignments.
+        Raises:
+            ValueError: If an operator is found but not followed by
+                a valid operand.
+        """
         # Unary instructions (x = -y) cannot have a second binary operator
         if existing_op:
             return existing_op, None
@@ -110,16 +162,21 @@ class Parser:
 
         return operator, src2
 
-
-
     def handle_live_statement(self):
-        """Parses the live definition line (e.g., live : a, b)."""
+        """
+        Parses the 'live:' line and sets the live-on-exit variables
+        on the code list after performing semantic validation.
+        Returns:
+            None
+        Raises:
+            ValueError: If a listed variable was never used in the
+                preceding code.
+        """
         self.get_next_token(TokenType.LIV)
         self.get_next_token(TokenType.COL)
         live_vars = self._collect_variable_list()
 
         # Handle trailing newline
-
         if self.peek_current_token() and self.peek_current_token().type == TokenType.NL:
             self.get_next_token()
 
@@ -129,8 +186,18 @@ class Parser:
         self.code_list.set_live_on_exit(live_vars)
 
     def semantic_check(self, live_vars):
-        """Performs semantic checks on the live variables to ensure they are
-        actually used in the code."""
+        """
+        Validates that every variable declared live on exit actually
+        appears in the instruction list.
+        Args:
+            live_vars: A list of variable name strings declared as
+                live on exit.
+        Returns:
+            None
+        Raises:
+            ValueError: If any variable in live_vars is not used in
+                the code.
+        """
         used_vars = set()
         for inst in self.code_list.instructions:
             # Add destination variable
@@ -152,7 +219,13 @@ class Parser:
         return        
 
     def _collect_variable_list(self) -> List[str]:
-        """Parses a comma-separated list of variables."""
+        """
+        Parses a comma-separated list of variable names from the
+        token stream.
+        Returns:
+            list: A list of variable name strings. Returns an empty
+                list if no variables are present.
+        """
         variables = []
 
         # Checks for zero instructions in input file
