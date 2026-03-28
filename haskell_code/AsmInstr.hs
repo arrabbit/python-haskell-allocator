@@ -47,6 +47,61 @@ mkRegister n
     | n >= 0    = Register n 
     | otherwise = error $ "mkRegister: negative register index" ++ show n
 
+-- Immediate source operand: #x
+immSrc :: Int -> SrcOperand
+immSrc = ImmSrc
+
+-- Variable (abs-mode) source operand
+varSrc :: String -> SrcOperand
+varSrc = VarSrc
+
+-- Register-direct source operand
+regSrc :: Register -> SrcOperand
+regSrc = RegSrc
+
+-- Variable (abs-mode) destination operand
+varDst :: String -> DstOperand
+varDst = VarDst
+
+-- Register-direct destination operand
+regDst :: Register -> DstOperand
+regDst = RegDst
+
+-- ADD src,Ri
+mkAdd :: SrcOperand -> Register -> AsmInstr
+mkAdd = ArithInstr Add
+
+-- SUB src,Ri
+mkSub :: SrcOperand -> Register -> AsmInstr
+mkSub = ArithInstr Sub
+
+-- MUL src,Ri
+mkMul :: SrcOperand -> Register -> AsmInstr
+mkMul = ArithInstr Mul
+
+-- DIV src,Ri
+mkDiv :: SrcOperand -> Register -> AsmInstr
+mkDiv = ArithInstr Div
+
+-- MOV src,Ri — copy a source operand into a register
+mkMovToReg :: SrcOperand -> Register -> AsmInstr
+mkMovToReg = MovToReg
+
+-- MOV Ri,dst — copy a register value to a destination
+mkMovFromReg :: Register -> DstOperand -> AsmInstr
+mkMovFromReg = MovFromReg
+
+-- The empty program (no instructions yet)
+emptyProgram :: AsmProgram
+emptyProgram = AsmProgram []
+
+-- | Append one instruction to the end of a program
+appendInstr :: AsmProgram -> AsmInstr -> AsmProgram
+appendInstr (AsmProgram instrs) instr = AsmProgram (instrs ++ [instr])
+
+-- | Build a program from a list of instructions
+mkProgram :: [AsmInstr] -> AsmProgram
+mkProgram = AsmProgram
 
 ----------
 -- Show --
