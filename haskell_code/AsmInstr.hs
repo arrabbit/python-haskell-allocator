@@ -1,6 +1,38 @@
+-- |
+-- Summary: Defines the abstract data types for representing target
+--   architecture assembly instructions, operands, and programs.
+--
+-- Authors: Jordan Senko, Anna Running Rabbit, and Joseph Mills
+-- Date: March 31, 2026
+
 module AsmInstr
     (
         Register
+        , SrcOperand
+        , DstOperand
+        , AluOp
+        , AsmInstr
+        , AsmProgram
+        -- Register constructor
+        , mkRegister
+        -- Source operand constructors
+        , immSrc
+        , varSrc
+        , regSrc
+        -- Destination operand constructors
+        , varDst
+        , regDst
+        -- Instruction constructors
+        , mkAdd
+        , mkSub
+        , mkMul
+        , mkDiv
+        , mkMovToReg
+        , mkMovFromReg
+        -- Program constructors
+        , emptyProgram
+        , appendInstr
+        , mkProgram    
     ) where
 
 newtype Register = Register Int -- A wrapper type for Int
@@ -42,56 +74,58 @@ newtype AsmProgram = AsmProgram [AsmInstr]
 -- Constructors --
 ------------------
 
+-- | Creates a register from a non-negative integer index.
+--   Raises an error if the index is negative.
 mkRegister :: Int -> Register
 mkRegister n
     | n >= 0    = Register n 
-    | otherwise = error $ "mkRegister: negative register index" ++ show n
+    | otherwise = error $ "mkRegister: negative register index " ++ show n
 
--- Immediate source operand: #x
+-- | Creates an immediate-mode source operand: #x
 immSrc :: Int -> SrcOperand
 immSrc = ImmSrc
 
--- Variable (abs-mode) source operand
+-- | Creates a variable (abs-mode) source operand
 varSrc :: String -> SrcOperand
 varSrc = VarSrc
 
--- Register-direct source operand
+-- | Creates a register-direct source operand
 regSrc :: Register -> SrcOperand
 regSrc = RegSrc
 
--- Variable (abs-mode) destination operand
+-- | Creates a variable (abs-mode) destination operand
 varDst :: String -> DstOperand
 varDst = VarDst
 
--- Register-direct destination operand
+-- | Creates a register-direct destination operand
 regDst :: Register -> DstOperand
 regDst = RegDst
 
--- ADD src,Ri
+-- | Creates ADD instruction: ADD src, Ri
 mkAdd :: SrcOperand -> Register -> AsmInstr
 mkAdd = ArithInstr Add
 
--- SUB src,Ri
+-- | Creates SUB instruction: SUB src, Ri
 mkSub :: SrcOperand -> Register -> AsmInstr
 mkSub = ArithInstr Sub
 
--- MUL src,Ri
+-- | Creates MUL instruction: MUL src, Ri
 mkMul :: SrcOperand -> Register -> AsmInstr
 mkMul = ArithInstr Mul
 
--- DIV src,Ri
+-- | Creates DIV instruction: DIV src, Ri
 mkDiv :: SrcOperand -> Register -> AsmInstr
 mkDiv = ArithInstr Div
 
--- MOV src,Ri — copy a source operand into a register
+-- | Creates a MOV instruction: MOV src, Ri — copy source operand into register
 mkMovToReg :: SrcOperand -> Register -> AsmInstr
 mkMovToReg = MovToReg
 
--- MOV Ri,dst — copy a register value to a destination
+-- | Creates a MOV instruction: MOV Ri, dst — copy register value to destination
 mkMovFromReg :: Register -> DstOperand -> AsmInstr
 mkMovFromReg = MovFromReg
 
--- The empty program (no instructions yet)
+-- | The empty program (no instructions yet)
 emptyProgram :: AsmProgram
 emptyProgram = AsmProgram []
 
@@ -138,24 +172,3 @@ instance Show AsmInstr where
 instance Show AsmProgram where
     show :: AsmProgram -> String
     show (AsmProgram instrs) = foldr (\x acc -> x ++ "\n" ++ acc) "" (map show instrs)
-
--------------
--- Testing --
--------------
-
-exampleProgram :: AsmProgram
-exampleProgram = mkProgram
-    [ mkMovToReg   (varSrc "a")        r0           -- MOV a,R0
-    , mkAdd        (immSrc 1)          r0           -- ADD #1,R0
-    , mkMovToReg   (regSrc r0)         r1           -- MOV R0,R1
-    , mkMul        (immSrc 4)          r1           -- MUL #4,R1
-    , mkAdd        (immSrc 1)          r1           -- ADD #1,R1  (t2 = t1+1, reusing R1 for t2)
-    , mkMul        (immSrc 3)          r0           -- MUL #3,R0  (t3 = a*3, a now dead so reuse R0)
-    , mkSub        (regSrc r0)         r1           -- SUB R0,R1
-    , mkDiv        (immSrc 2)          r1           -- DIV #2,R1
-    , mkAdd        (varSrc "c")        r1           -- ADD c,R1
-    , mkMovFromReg r1                  (varDst "d") -- MOV R1,d
-    ]
-  where
-    r0 = mkRegister 0
-    r1 = mkRegister 1

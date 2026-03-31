@@ -24,7 +24,9 @@ This is a test.
 .venv/Scripts/deactivate.bat
 ```
 
-## Build Instructions
+## Haskell Solution Build Instructions
+
+## Imperative Solution Build Instructions
 
 ### main.py
 To run `main.py`, while in <u>py_code</u> directory, run command:
