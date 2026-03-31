@@ -1,3 +1,9 @@
+-- |
+-- Summary: 
+--
+-- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+-- Date: March 31, 2026
+
 module TestData where
 
 import AsmInstr
