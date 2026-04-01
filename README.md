@@ -25,9 +25,12 @@ This is a test.
 ```
 
 ## Haskell Solution Build Instructions
+### AsmInstr.hs
+To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci AsmInstr.hs
+
 
 ## Imperative Solution Build Instructions
-
 ### main.py
 To run `main.py`, while in <u>py_code</u> directory, run command:
     python main.py `num_registers` test_drivers/test_inputs/`file_name`
