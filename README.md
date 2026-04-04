@@ -29,6 +29,10 @@ This is a test.
 To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci AsmInstr.hs
 
+To run 'TestAsmInstr.hs', while in <u>haskell_code</u> directory, load with the command:
+    ghci TestAsmInstr.hs
+    runTests
+
 
 ## Imperative Solution Build Instructions
 ### main.py
