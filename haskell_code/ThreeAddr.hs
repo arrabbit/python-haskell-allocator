@@ -5,8 +5,9 @@
 -- allocator: operands, operators, individual instructions, and instruction
 -- sequences (with live-on-exit variable information).
 --
--- Constructors for 'InstrSeq' are intentionally hidden; use 'newInstrSeq'.
--- Constructors for 'Operand' and 'Op' are exported for use by other modules.
+-- Constructors for 'InstrSeq' and 'Instr' are intentionally hidden.
+-- Use 'newInstrSeq' for sequences, and 'mkBinOp', 'mkUnaryOp', 'mkCopy'
+-- for instructions. Use getter functions to query instruction fields.
 --
 -- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 -- Date: March 30, 2026
@@ -25,6 +26,12 @@ module ThreeAddr
   , newInstrSeq
   , getInstrs
   , getLiveOut
+    -- * Instruction queries
+  , getDest
+  , getSrc1
+  , getOp
+  , getSrc2
+  , instrType  
     -- * Display functions
   , showOperand
   , showOp
@@ -122,6 +129,38 @@ getInstrs (ISeq instrs _) = instrs
 -- | Extract the live-on-exit variable list from a sequence.
 getLiveOut :: InstrSeq -> [String]
 getLiveOut (ISeq _ live) = live
+
+-- ---------------------------------------------------------------------------
+-- Instruction queries
+-- ---------------------------------------------------------------------------
+
+-- | Get the destination variable of an instruction.
+getDest :: Instr -> String
+getDest (BinOp dest _ _ _) = dest
+getDest (UnaryOp dest _)   = dest
+getDest (Copy dest _)      = dest
+
+-- | Get the first source operand of an instruction.
+getSrc1 :: Instr -> Operand
+getSrc1 (BinOp _ src1 _ _) = src1
+getSrc1 (UnaryOp _ src)    = src
+getSrc1 (Copy _ src)       = src
+
+-- | Get the operator (if any).
+getOp :: Instr -> Maybe Op
+getOp (BinOp _ _ op _) = Just op
+getOp _                = Nothing
+
+-- | Get the second source operand (if any).
+getSrc2 :: Instr -> Maybe Operand
+getSrc2 (BinOp _ _ _ src2) = Just src2
+getSrc2 _                  = Nothing
+
+-- | Returns the type of an instruction (binary, unary, or copy).
+instrType :: Instr -> String
+instrType (BinOp _ _ _ _) = "binary"
+instrType (UnaryOp _ _)   = "unary"
+instrType (Copy _ _)      = "copy"
 
 -- ---------------------------------------------------------------------------
 -- Display functions
