@@ -29,8 +29,16 @@ This is a test.
 To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci AsmInstr.hs
 
-To run 'TestAsmInstr.hs', while in <u>haskell_code</u> directory, load with the command:
+To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci TestAsmInstr.hs
+    runTests
+
+### ThreeAddr.hs
+To run `ThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci ThreeAddr.hs
+
+To run `TestThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci TestThreeAddr.hs
     runTests
 
 
