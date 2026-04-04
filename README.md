@@ -24,8 +24,17 @@ This is a test.
 .venv/Scripts/deactivate.bat
 ```
 
-## Build Instructions
+## Haskell Solution Build Instructions
+### AsmInstr.hs
+To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci AsmInstr.hs
 
+To run 'TestAsmInstr.hs', while in <u>haskell_code</u> directory, load with the command:
+    ghci TestAsmInstr.hs
+    runTests
+
+
+## Imperative Solution Build Instructions
 ### main.py
 To run `main.py`, while in <u>py_code</u> directory, run command:
     python main.py `num_registers` test_drivers/test_inputs/`file_name`
