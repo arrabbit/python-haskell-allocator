@@ -62,7 +62,7 @@ isViable :: Int -> Variable -> ColourSol -> Bool
 isViable colour var solRest = all noConflict (getAdjacent var)
     -- Checks one neighbour for conflict
     where noConflict neighbour = case lookup neighbour solRest of
-        -- If the neighbour has been coloured
-        Just c -> c /= colour  -- checks if colours match
-        -- If the neighbour hasn't been coloured
-        Nothing -> True
+                                     -- If the neighbour has been coloured
+                                     Just c -> c /= colour  -- checks if colours match
+                                     -- If the neighbour hasn't been coloured
+                                     Nothing -> True
