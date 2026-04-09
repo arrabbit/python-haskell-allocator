@@ -29,18 +29,39 @@ This is a test.
 To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci AsmInstr.hs
 
-To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestAsmInstr.hs
-    runTests
-
 ### ThreeAddr.hs
 To run `ThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci ThreeAddr.hs
 
+### Test Module Instructions
+To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci TestAsmInstr.hs
+    ghci> runTests
+
 To run `TestThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci TestThreeAddr.hs
-    runTests
+    ghci> runTests
 
+To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci TestData.hs
+ To view three-address instruction sequences:
+    ghci> putStr (showInstrSeq testSpecExample)
+    ghci> putStr (showInstrSeq testBinary)
+    ghci> putStr (showInstrSeq testUnary)
+    ghci> putStr (showInstrSeq testEmpty)
+    ghci> putStr (showInstrSeq testEmptyLive)
+    ghci> putStr (showInstrSeq testLiveOnEntry)
+    ghci> putStr (showInstrSeq testHighInterfere)
+    ghci> putStr (showInstrSeq testBacktrack)
+ To view the expected assembly output:
+    ghci> putStr (show expectedAsmSpec)
+ To query individual test data:
+    ghci> length (getInstrs testSpecExample)
+    ghci> getLiveOut testSpecExample
+    ghci> getDest (head (getInstrs testSpecExample))
+ To check instruction counts:
+    ghci> length (getInstrs testBinary)
+    ghci> length (getInstrs testEmpty)
 
 ## Imperative Solution Build Instructions
 ### main.py
