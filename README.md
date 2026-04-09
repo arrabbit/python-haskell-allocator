@@ -54,7 +54,7 @@ To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the comm
     ghci> putStr (showInstrSeq testHighInterfere)
     ghci> putStr (showInstrSeq testBacktrack)
  To view the expected assembly output:
-    ghci> putStr (show expectedAsmSpec)
+    ghci> putStr (show exampleProgram)
  To query individual test data:
     ghci> length (getInstrs testSpecExample)
     ghci> getLiveOut testSpecExample
