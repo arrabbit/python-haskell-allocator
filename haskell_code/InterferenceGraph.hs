@@ -1,13 +1,16 @@
 -- | InterferenceGraph.hs
 --
--- ADT representing the interference graph for register allocation.
--- Each node is a Variable; and edge between two nodes means those two
--- variables are simultaneously live at some point in the code and so
--- cannot share a register.
+--   ADT representing the interference graph for register allocation.
+--   Each node is a Variable; and edge between two nodes means those two
+--   variables are simultaneously live at some point in the code and so
+--   cannot share a register.
+--
+--   Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+--   Date: April 8, 2026
 
 module InterferenceGraph (
     IGraph,
-    emtpyGraph,
+    emptyGraph,
     addVariable,
     addEdge,
     getVariables,
@@ -17,6 +20,7 @@ module InterferenceGraph (
 
 import Variable (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
 import Data.String (String)
+import Data.List (find)
 
 newtype IGraph = IGraph [Variable]
     deriving (Eq)
@@ -38,7 +42,7 @@ addEdge:: String -> String -> IGraph -> IGraph
 addEdge name1 name2 graph  =
     let graph'              = addVariable name1 (addVariable name2 graph) -- Graph with name 1 and 2 added
         IGraph vars'        = graph'
-        updated             = map updateVar vars'
+        updated             = map updatedVar vars'
     in IGraph updated
     where
         updatedVar v                                        -- Updates adjacency lists
@@ -47,7 +51,7 @@ addEdge name1 name2 graph  =
             | otherwise             = v
 
 -- | Return all variable nodes in the graph
-getVariables :: IGraph -> [Variables]
+getVariables :: IGraph -> [Variable]
 getVariables (IGraph vars)  = vars
 
 -- | Look up a variable node by name. Returns nothing if no such variable
@@ -64,5 +68,5 @@ showGraph (IGraph vars)
 
 -- | Derived Show calls showGraph so printing an IGraph in GHCI
 --   gives the same formatted output.
-instance show IGraph where
+instance Show IGraph where
     show = showGraph
