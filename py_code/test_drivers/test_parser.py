@@ -20,7 +20,8 @@ def main():
         ir_list = parser.parse()
 
         print(f"\n[Generated IR]:")
-        ir_list.__print_as_str__()
+        print(ir_list)    # __str__ is called automatically by print()
+
 
     except Exception as e:
         print(f"\n[Error]: {e}")

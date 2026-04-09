@@ -20,6 +20,13 @@ class TokenType(Enum):
     NL = "newline"
     INV = "invalid"
 
+_SINGLE_CHAR_TYPES = {
+    "+": TokenType.OP,  "-": TokenType.OP,
+    "*": TokenType.OP,  "/": TokenType.OP,
+    ":": TokenType.COL, ",": TokenType.COM,
+    "\n": TokenType.NL, "=": TokenType.EQ,
+}
+
 class Token(NamedTuple):
     type: TokenType
     value: str
@@ -39,50 +46,42 @@ class Token(NamedTuple):
         """
         Determines the TokenType of a given string.
         Args:
-            char: The string to classify (may be a single character or
-                a multi-character token such as a variable name or 'live').
+            char: The string to classify (a single character or a
+                multi-character token such as a variable name or 'live').
         Returns:
             TokenType: The corresponding token type.
         Raises:
             TypeError: If the string does not match any valid token type.
         """
-        if (char == "live"):
+        if char in _SINGLE_CHAR_TYPES:
+            return _SINGLE_CHAR_TYPES[char]
+        if char == "live":
             return TokenType.LIV
-        elif (char in "+-/*"):
-            return TokenType.OP
-        elif (char.isnumeric()):
+        if char.isnumeric():
             return TokenType.LIT
-        # checks for single char var (not t)
-        elif (len(char) == 1 and char.islower() and char != "t"):
+        if len(char) == 1 and char.islower() and char != "t":
             return TokenType.VAR
-        # checks for t followed by one or more int
-        elif (char[0] == "t" and char[1:].isnumeric() and len(char) > 1):
+        if char[0] == "t" and len(char) > 1 and char[1:].isnumeric():
             return TokenType.VAR
-        elif (char == ":"):
-            return TokenType.COL
-        elif (char == ","):
-            return TokenType.COM
-        elif (char == "\n"):
-            return TokenType.NL
-        elif (char == "="):
-            return TokenType.EQ
-        else:
-            raise TypeError(f"Invalid token: {char}")
+        raise TypeError(f"Invalid token: {char}")
 
 
 class Tokenizer:
     def __init__(self, file_name: str):
         """
-        Initializes the Tokenizer by opening the given input file.
+        Initializes the Tokenizer by reading the entire input file into
+        a content buffer.
         Args:
             file_name: The path to the input file to tokenize.
         Raises:
             FileNotFoundError: If the specified file does not exist.
-        """  
-        try: 
-            self.file = open(file_name)
-            self.tokens = [] # empty list not list of class token
-        except FileNotFoundError as e:
+        """
+        try:
+            with open(file_name) as f:
+                self.content = f.read()
+            self.tokens = []
+            self._pos = 0
+        except FileNotFoundError:
             raise FileNotFoundError(f"Tokenize input file not found: {file_name}")
 
     def __str__(self):
@@ -90,10 +89,10 @@ class Tokenizer:
         Returns a comma-separated string of all token values.
         Returns:
             str: A string representation of the token list.
-        """    
+        """
         values = []
         for token in self.tokens:
-            if type(token.value) != str:
+            if not isinstance(token.value, str):
                 continue
             if token.value == "\n":
                 values.append("\\n")
@@ -101,63 +100,53 @@ class Tokenizer:
                 values.append(token.value)
         return ", ".join(values)
 
+    def _read_digit_token(self) -> str:
+        """Read consecutive digit characters from the content buffer and
+        return the full literal string, advancing self._pos."""
+        result = ""
+        while self._pos < len(self.content) and self.content[self._pos].isdigit():
+            result += self.content[self._pos]
+            self._pos += 1
+        return result
 
-    def get_string(self, curr_pos, start_char: str) -> str:
+    def _read_alpha_token(self, start_char: str) -> str:
+        """Read consecutive alphanumeric characters from the content buffer
+        and return the full token string, advancing self._pos."""
+        result = start_char
+        while self._pos < len(self.content) and self.content[self._pos].isalnum():
+            result += self.content[self._pos]
+            self._pos += 1
+        return result
+
+    def get_string(self, start_char: str) -> str:
         """
-        Reads consecutive characters from the file to build a complete
-        alphanumeric token starting from the given character.
+        Reads consecutive characters from the content buffer to build a
+        complete alphanumeric token starting from the given character.
         Args:
-            curr_pos: The current file position (after start_char has
-                been read).
             start_char: The first character of the token being built.
         Returns:
             str: The complete token string.
         """
-        result = start_char
-        self.file.seek(curr_pos) # move ptr to after start_char
-        
-        while True:
-            next_char = self.file.read(1)
-           
-            if not next_char:
-                break
+        if start_char.isdigit():
+            return start_char + self._read_digit_token()
+        return self._read_alpha_token(start_char)
 
-            if start_char.isdigit():
-                if next_char.isdigit():
-                    result += next_char
-                else:
-                    self.file.seek(self.file.tell() - 1)
-                    break
-            
-            elif start_char.isalpha():
-
-                if next_char.isalnum(): 
-                    result += next_char
-                else:
-                    self.file.seek(self.file.tell() - 1)
-                    break
-            else:
-                self.file.seek(self.file.tell() - 1)
-                break
-                
-        return result
-            
     def tokenize(self) -> None:
         """
-        Reads the input file character by character and populates the
+        Reads the content buffer character by character and populates the
         token list. Skips whitespace and groups alphanumeric characters
         into complete tokens.
         Returns:
             None
         """
-        while True:
-            char = self.file.read(1)
-            if not char:
-                break
+        self._pos = 0
+        while self._pos < len(self.content):
+            char = self.content[self._pos]
+            self._pos += 1
             if char == " ":
                 continue
             if char.isdigit() or char.isalpha():
-                var = self.get_string(self.file.tell(), char)
+                var = self.get_string(char)
                 self.tokens.append(Token(value=var, type=Token.get_type(var)))
             if char in "+-/*=\n:,":
                 self.tokens.append(Token(value=char, type=Token.get_type(char)))
