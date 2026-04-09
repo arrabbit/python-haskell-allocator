@@ -1,6 +1,6 @@
 -- |
 -- Summary: Automated test module for AsmInstr.hs. Runs all test cases and
---     reports pass/fail results with a summary count/
+--     reports pass/fail results with a summary count.
 --
 -- Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 -- Date: April 1, 2026
@@ -106,13 +106,13 @@ srcOpTests =
     , showTest "SrcOperand: temp variable t1"      (varSrc "t1")              "t1"
     , showTest "SrcOperand: register direct R2"    (regSrc (mkRegister 2))    "R2"]
 
--- Destinatiom operand tests
+-- Destination operand tests
 dstOpTests :: [TestResult]
 dstOpTests =
     [ showTest    "DstOperand: variable d"            (varDst "d")               "d"
     , showTest    "DstOperand: register direct R3"    (regDst (mkRegister 3))    "R3"]
 
--- Artimetic instruction tests
+-- Arithmetic instruction tests
 arithInstrTests :: [TestResult]
 arithInstrTests =
     [ showTest    "Instr: ADD immediate"    (mkAdd (immSrc 1) (mkRegister 0))    
