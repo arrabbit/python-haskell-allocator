@@ -1,4 +1,3 @@
--- |
 -- Summary: Hard-coded test data for the Haskell register allocator. Each test
 --    case corresponds to a test input file from the python solution. Provides
 --    InstrSeq values for testing the three-address representation and
