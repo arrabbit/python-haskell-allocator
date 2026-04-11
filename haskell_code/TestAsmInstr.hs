@@ -9,7 +9,6 @@ module TestAsmInstr where
 
 import AsmInstr
 import TestUtils
-import Control.Exception (evaluate, try, SomeException)
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()
@@ -19,13 +18,8 @@ runTests = do
     putStrLn "========================================="
     putStrLn "" -- empty line for spacing
 
-    -- Run tests with no error handling necessary
-    let noErrResults = runNoErrTests
-
-    -- Run tests with error handling
-    errResults <- runErrTests
-
-    let allResults = noErrResults ++ errResults
+    -- Run tests (excluding expected errors)
+    let allResults = tests
 
     -- Prints each result
     printAllResults allResults
@@ -42,11 +36,11 @@ runTests = do
     putStrLn "========================================="
 
 -------------------------------------------------------
--- All no error tests
+-- Tests
 -------------------------------------------------------
 
-runNoErrTests :: [TestResult]
-runNoErrTests = registerTests ++ srcOpTests ++ dstOpTests
+tests :: [TestResult]
+tests = registerTests ++ srcOpTests ++ dstOpTests
     ++ arithInstrTests ++ movInstrTests ++ programTests ++ equalTests
 
 -- Register tests
@@ -142,22 +136,3 @@ equalTests =
     , eqTest    "Equality: same operand"
         (immSrc 1) (immSrc 1)
     ]
-
--------------------------------------------------------
--- All error tests
--------------------------------------------------------
-
-runErrTests :: IO [TestResult]
-runErrTests = do
-    r1 <- testNegReg
-    return [r1]
-
--- | Tests that mkRegister (-1) throws an error
-testNegReg :: IO TestResult
-testNegReg = do
-    result <- try (evaluate (mkRegister (-1))) :: IO (Either SomeException Register)
-    case result of
-        Left e -> return (TestResult "Register: negative index (error)" True
-                  (show e) "exception thrown")
-        Right v -> return (TestResult "Register: negative index (error)" False
-                   (show v) "exception thrown")

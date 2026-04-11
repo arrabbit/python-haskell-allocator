@@ -9,7 +9,6 @@ module TestThreeAddr where
 
 import ThreeAddr
 import TestUtils
-import Control.Exception (evaluate, try, SomeException)
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()
