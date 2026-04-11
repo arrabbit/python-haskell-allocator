@@ -63,6 +63,7 @@ To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the comm
     ghci> length (getInstrs testBinary)
     ghci> length (getInstrs testEmpty)
 
+
 ## Imperative Solution Build Instructions
 ### main.py
 To run `main.py`, while in <u>py_code</u> directory, run command:

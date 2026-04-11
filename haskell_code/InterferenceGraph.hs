@@ -19,10 +19,9 @@ module InterferenceGraph (
 ) where
 
 import Variable (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
-import Data.String (String)
 import Data.List (find)
 
-newtype IGraph = IGraph [Variable]
+data IGraph = IGraph [Variable]
     deriving (Eq)
 
 emptyGraph:: IGraph
