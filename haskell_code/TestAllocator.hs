@@ -45,7 +45,7 @@ isValidColouring graph colouring =
   where
     checkVar var =
         let colour = lookup (getVarName var) colouring
-            adjColours = map (`lookup` colouring) (getAdjacent var)
+            adjColours = map (\name -> lookup colouring) (getAdjacent var)
         in all (/= colour) adjColours
 
 -------------------------------------------------------
@@ -68,13 +68,13 @@ graphOneEdge = addEdge "x" "y" emptyGraph
 -- Based on the project spec example. We add all interfering edges
 -- and an isolated variable 'd' which is live on exit but doesn't conflict.
 graphSpec :: IGraph
-graphSpec = 
-    let g1 = foldl (\g (u, v) -> addEdge u v g) emptyGraph edges
-    in addVariable "d" g1
+graphSpec = addVariable "d" (addAllEdges edges emptyGraph)
   where
     edges = [ ("a", "c"), ("a", "t1"), ("a", "t2")
             , ("c", "t1"), ("c", "t2"), ("c", "t3"), ("c", "b"), ("c", "t4")
             , ("t2", "t3") ]
+    addAllEdges [] graph = graph
+    addAllEdges ((name1, name2):rest) graph = addAllEdges rest (addEdge name1 name2 graph)
 
 -------------------------------------------------------
 -- Allocator tests
