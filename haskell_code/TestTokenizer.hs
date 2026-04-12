@@ -69,10 +69,11 @@ oneLiveTest = [eqTest "Tokenize: single live variable: "  -- name
 empLiveTest :: [TestResult]
 empLiveTest = [eqTest "Tokenize: empty live line: "  -- name
                (tokenize "live:")                    -- actual
-               [TokEq, TokCol, TokNewLn]]            -- expected
+               [TokLive, TokCol, TokNewLn]]          -- expected
 
 -- | Multiple line input test.
 multiLnTest :: [TestResult]
-multiLnTest = [eqTest "tokenize: multiple line input: "                               -- name
-               (tokenize "a = 5\nlive:a")                                             -- actual
-               [TokVar "a", TokEq, TokLit 5, TokNewLn, TokLive, TokCol, TokVar "a"]]  -- expected
+multiLnTest = [eqTest "tokenize: multiple line input: "                  -- name
+               (tokenize "a = 5\nlive: a")                               -- actual
+               [TokVar "a", TokEq, TokLit 5, TokNewLn, TokLive, TokCol,
+                TokVar "a", TokNewLn]]                                   -- expected
