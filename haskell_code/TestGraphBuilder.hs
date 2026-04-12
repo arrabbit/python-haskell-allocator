@@ -16,9 +16,9 @@ import TestUtils         (TestResult, printAllResults, printSummary,
 
 main :: IO ()
 main = do
-    putStrLn "========================================="
-    putStrLn " GraphBuilder.hs - Automated Test Results"
-    putStrLn "========================================="
+    putStrLn "================================"
+    putStrLn " GraphBuilder.hs - Test Results"
+    putStrLn "================================"
     putStrLn ""
     
     printAllResults graphBuilderTests
@@ -64,102 +64,99 @@ graphBuilderTests =
 
     -- empty program edge cases
     [ boolTest "empty program, no live-outs: graph is empty"
-        (null (getVariables (buildGraph (newInstrSeq [] [])))) True
+        (null (getVariables (buildGraph (newInstrSeq [] [])))) True,
 
-    , boolTest "empty program, one live-out: that variable is a node"
-        (isJust (getVariable "x" (buildGraph (newInstrSeq [] ["x"])))) True
+    boolTest "empty program, one live-out: that variable is a node"
+        (isJust (getVariable "x" (buildGraph (newInstrSeq [] ["x"])))) True,
 
-    , boolTest "empty program, one live-out: no edges"
-        (null (adjOf "x" (buildGraph (newInstrSeq [] ["x"])))) True
+    boolTest "empty program, one live-out: no edges"
+        (null (adjOf "x" (buildGraph (newInstrSeq [] ["x"])))) True,
 
     -- two live-outs interfere because they are simultaneously live
-    , boolTest "empty program, two live-outs: both variables are nodes"
+    boolTest "empty program, two live-outs: both variables are nodes"
         (let g = buildGraph (newInstrSeq [] ["x", "y"])
-         in isJust (getVariable "x" g) && isJust (getVariable "y" g)) True
+         in isJust (getVariable "x" g) && isJust (getVariable "y" g)) True,
 
-    , boolTest "empty program, two live-outs: they interfere with each other"
-        (hasEdge "x" "y" (buildGraph (newInstrSeq [] ["x", "y"]))) True
+    boolTest "empty program, two live-outs: they interfere with each other"
+        (hasEdge "x" "y" (buildGraph (newInstrSeq [] ["x", "y"]))) True,
 
     -- a variable that is defined but never used and not live-out has no node
-    , boolTest "dead variable: defined but never used, not in graph"
-        (isNothing (getVariable "x" (buildGraph (newInstrSeq [mkCopy "x" (Lit 1)] [])))) True
+    boolTest "dead variable: defined but never used, not in graph"
+        (isNothing (getVariable "x" (buildGraph (newInstrSeq [mkCopy "x" (Lit 1)] [])))) True,
 
     -- Lit operands don't produce nodes
-    , boolTest "literal operand: no node created for Lit"
-        (null (getVariables (buildGraph (newInstrSeq [mkCopy "x" (Lit 5)] [])))) True
+    boolTest "literal operand: no node created for Lit"
+        (null (getVariables (buildGraph (newInstrSeq [mkCopy "x" (Lit 5)] [])))) True,
 
     -- live-out variable that isn't defined in the block still gets a node
-    , boolTest "live-out not defined in block: still has a node"
-        (isJust (getVariable "x" (buildGraph (newInstrSeq [] ["x"])))) True
+    boolTest "live-out not defined in block: still has a node"
+        (isJust (getVariable "x" (buildGraph (newInstrSeq [] ["x"])))) True,
 
     -- single unary instr
-    , boolTest "unary instr: src variable is added as a node"
-        (isJust (getVariable "a" (buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"])))) True
+    boolTest "unary instr: src variable is added as a node"
+        (isJust (getVariable "a" (buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"])))) True,
 
-    , boolTest "unary instr: src interferes with live-out dest"
-        (hasEdge "a" "t1" (buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"]))) True
+    boolTest "unary instr: src interferes with live-out dest"
+        (hasEdge "a" "t1" (buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"]))) True,
 
     -- a variable used as both src1 and src2 produces exactly one node
-    , boolTest "same variable as both sources: only one node created"
+    boolTest "same variable as both sources: only one node created"
         (let g = buildGraph (newInstrSeq [mkBinOp "t1" (Var "a") Add (Var "a")] ["t1"])
-         in length (filter ((== "a") . getVarName) (getVariables g)) == 1) True
+         in length (filter ((== "a") . getVarName) (getVariables g)) == 1) True,
 
     -- two-instruction chain
-    , boolTest "two instrs: chain produces correct interference edges"
+    boolTest "two instrs: chain produces correct interference edges"
         (let g = buildGraph (newInstrSeq
                     [ mkBinOp "t1" (Var "a") Add (Lit 1)    -- t1 = a + 1
                     , mkBinOp "b"  (Var "t1") Mul (Lit 2)   -- b  = t1 * 2
                     ] ["b"])
-         in hasEdge "t1" "b" g && hasEdge "a" "t1" g && not(hasEdge "a" "b" g)) True
+         in hasEdge "t1" "b" g && hasEdge "a" "t1" g && not(hasEdge "a" "b" g)) True,
 
     -- spec example: all eight variables
-    , eqTest "spec program: all variables appear as nodes"
+    eqTest "spec program: all variables appear as nodes"
         (sort (varNames specGraph))
-        (sort ["a", "b", "c", "d", "t1", "t2", "t3", "t4"])
+        (sort ["a", "b", "c", "d", "t1", "t2", "t3", "t4"]),
 
     -- confirmed edges exist
-    , boolTest "spec program: c interferes with d"
-        (hasEdge "c" "d" specGraph) True
+    boolTest "spec program: c interferes with d"
+        (hasEdge "c" "d" specGraph) True,
 
-    , boolTest "spec program: t4 interferes with d"
-        (hasEdge "t4" "d" specGraph) True
+    boolTest "spec program: t4 interferes with d"
+        (hasEdge "t4" "d" specGraph) True,
 
-    , boolTest "spec program: b interferes with c"
-        (hasEdge "b" "c" specGraph) True
+    boolTest "spec program: b interferes with c"
+        (hasEdge "b" "c" specGraph) True,
 
-    , boolTest "spec program: b interferes with t4"
-        (hasEdge "b" "t4" specGraph) True
+    boolTest "spec program: b interferes with t4"
+        (hasEdge "b" "t4" specGraph) True,
 
-    , boolTest "spec program: t2 interferes with c"
-        (hasEdge "t2" "c" specGraph) True
+    boolTest "spec program: t2 interferes with c"
+        (hasEdge "t2" "c" specGraph) True,
 
-    , boolTest "spec program: t2 interferes with b"
-        (hasEdge "t2" "b" specGraph) True
+    boolTest "spec program: t2 interferes with b"
+        (hasEdge "t2" "b" specGraph) True,
 
-    , boolTest "spec program: t3 interferes with c"
-        (hasEdge "t3" "c" specGraph) True
+    boolTest "spec program: t3 interferes with c"
+        (hasEdge "t3" "c" specGraph) True,
 
-    , boolTest "spec program: t3 interferes with b"
-        (hasEdge "t3" "b" specGraph) True
+    boolTest "spec program: t3 interferes with b"
+        (hasEdge "t3" "b" specGraph) True,
 
-    , boolTest "spec program: t3 interferes with t2"
-        (hasEdge "t3" "t2" specGraph) True
+    boolTest "spec program: a interferes with c"
+        (hasEdge "a" "c" specGraph) True,
 
-    , boolTest "spec program: a interferes with c"
-        (hasEdge "a" "c" specGraph) True
+    boolTest "spec program: a interferes with t2"
+        (hasEdge "a" "t2" specGraph) True,
 
-    , boolTest "spec program: a interferes with t2"
-        (hasEdge "a" "t2" specGraph) True
+    boolTest "spec program: a interferes with t3"
+        (hasEdge "a" "t3" specGraph) True,
 
-    , boolTest "spec program: a interferes with t3"
-        (hasEdge "a" "t3" specGraph) True
+    boolTest "spec program: t1 interferes with c"
+        (hasEdge "t1" "c" specGraph) True,
 
-    , boolTest "spec program: t1 interferes with c"
-        (hasEdge "t1" "c" specGraph) True
+    boolTest "spec program: t1 interferes with t2"
+        (hasEdge "t1" "t2" specGraph) True,
 
-    , boolTest "spec program: t1 interferes with t2"
-        (hasEdge "t1" "t2" specGraph) True
-
-    , boolTest "spec program: t1 interferes with a"
+    boolTest "spec program: t1 interferes with a"
         (hasEdge "t1" "a" specGraph) True
     ]
