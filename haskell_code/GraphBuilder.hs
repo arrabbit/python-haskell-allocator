@@ -20,22 +20,19 @@ initialGraph liveOut =
     in  foldl (\acc name -> addEdges name (filter (/= name) liveOut) acc) g liveOut
 
 -- | Process one instruction during the backward traversal.
---   Updates the live set and interference graph according to the algorithm.
+--   Updates the live set and interference graph.
 --
 --   Step a: for each Var source not yet in the live set, add it and connect
---           it to every variable currently live.
+--           it to every currently live variable
 --   Step b: remove the destination from the live set.
 processInstr :: Instr -> ([String], IGraph) -> ([String], IGraph)
 processInstr instr (liveSet, graph) =
     let dest             = getDest instr
-        -- Collect Var names from source operands (ignore Lit operands)
         src1name         = varName (getSrc1 instr)
         src2name         = getSrc2 instr >>= varName
         srcNames         = [n | Just n <- [src1name, src2name]]
-        -- Step a: fold over source names, adding each new one to the live set
-        (liveSet', graph') = foldl addSrcVar (liveSet, graph) srcNames
-        -- Step b: the dest is defined here; it is not live above this point
-        liveSet''        = filter (/= dest) liveSet'
+        (liveSet', graph') = foldl addSrcVar (liveSet, graph) srcNames -- Step a: fold over source names, adding each new one to the live set
+        liveSet''        = filter (/= dest) liveSet' -- Step b: the dest is defined here; it is not live above this point
     in  (liveSet'', graph')
 
 -- | If the variable is not already live, add it as a node, connect it to
@@ -48,7 +45,7 @@ addSrcVar (liveSet, graph) name
         let graph' = addEdges name liveSet (addVariable name graph)
         in  (name : liveSet, graph')
 
--- | Add an interference edge between @var@ and every variable in @others@.
+-- | Add an interference edge between var and every variable in others
 addEdges :: String -> [String] -> IGraph -> IGraph
 addEdges var others graph = foldl (\g other -> addEdge var other g) graph others
 
