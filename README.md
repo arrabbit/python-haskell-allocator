@@ -26,29 +26,11 @@ This is a test.
 
 ## Haskell Solution Build Instructions
 ### AsmInstr.hs
-To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci AsmInstr.hs
-
-### ThreeAddr.hs
-To run `ThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci ThreeAddr.hs
-
-To run `Tokenizer.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci Tokenizer.hs
+To run any module, while in <u>haskell_code</u> directory, load with the
+command:
+    ghci <moduleName>.hs
 
 ### Test Module Instructions
-To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestAsmInstr.hs
-    ghci> runTests
-
-To run `TestThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestThreeAddr.hs
-    ghci> runTests
-
-To run `TestTokenizer.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestTokenizer.hs
-    ghci> runTests
-
 To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci TestData.hs
  To view three-address instruction sequences:
@@ -69,6 +51,11 @@ To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the comm
  To check instruction counts:
     ghci> length (getInstrs testBinary)
     ghci> length (getInstrs testEmpty)
+
+To run any other test module, while in <u>haskell_code</u> directory, load with
+the command:
+    ghci <moduleName>.hs
+    ghci> runTests
 
 
 ## Imperative Solution Build Instructions

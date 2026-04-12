@@ -46,6 +46,9 @@ getType ":" = [TokCol]
 getType "," = [TokCom]
 getType [o]
     | o `elem` "+-*/" = [TokOp o]
+getType ('-':rest)
+    | isValidVar rest = [TokOp '-', TokVar rest]  -- handles negative variable ex. '-a'
+    | isOnlyDigits rest = [TokOp '-', TokLit (read rest)] -- handles negative digit ex. '-2'
 getType word
     | isValidVar word = [TokVar word]
     | isOnlyDigits word = [TokLit (read word)]
