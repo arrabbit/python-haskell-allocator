@@ -7,7 +7,7 @@ import Variable          (Variable, newVariable, getVarName, getAdjacent, addAdj
 import InterferenceGraph (IGraph, emptyGraph, addVariable, addEdge,
                           getVariables, getVariable, showGraph)
 import GraphBuilder      (buildGraph)
-import ThreeAddr         (Operand(..), Op(..), InstrSeq,
+import ThreeAddr         (Operand(..), Op(..), InstrSeq, Instr,
                           mkBinOp, mkUnaryOp, mkCopy, newInstrSeq)
 
 
@@ -30,6 +30,10 @@ main = do
     putStrLn "\n=== GraphBuilder tests ==="
     runTests graphBuilderTests
 
+-------------
+-- Helpers --
+-------------
+
 -- | Sort the adjacency list of a variable for order-independent equivalence checking.
 sortedAdj :: Variable -> [String]
 sortedAdj = sort . getAdjacent
@@ -42,7 +46,7 @@ adjOf name graph = case getVariable name graph of
 
 -- | True if an edge exists between n1 and n2 in a graph
 hasEdge :: String -> String -> IGraph -> Bool
-hasEdge n1 n1 graph = 
+hasEdge n1 n2 graph = 
     n1 `elem` adjOf n2 graph && -- elem returns True if first var exists in adj graph of second var
     n2 `elem` adjOf n2 graph  
 
@@ -53,6 +57,7 @@ varNames = sort . map getVarName . getVariables
 ----------------
 -- Test Input --
 ----------------
+-- Used for multiple types of tests
 
 -- Test instructions
 testInstrs :: [ThreeAddr.Instr]
@@ -68,7 +73,7 @@ testInstrs =
 
 -- Test live list
 testSeq :: InstrSeq
-testSeq = newInstrSeq specInstrs ["d"] -- live: d
+testSeq = newInstrSeq testInstrs ["d"] -- live: d
 
 -- Test interference graph
 testGraph :: IGraph
@@ -130,5 +135,250 @@ variableTests =
 interferenceGraphTests :: [(String, Bool)]
 interferenceGraphTests = 
     [
-        ()
+        -- emptyGraph
+        ("emtpyGraph: has no variables", 
+            null (getVariables emptyGraph)
+        ),
+
+        -- addVariable
+        ("addVariable: graph grows by one node", 
+            length (getVariables (addVariable "a" emptyGraph)) == 1
+        ),
+
+        ("addVariable: node has correct name", 
+            case getVariable "a" (addVariable "a" emptyGraph) of
+                Just v -> getVarName v == "a"
+                Nothing -> False
+        ),
+
+        ("addVariable: duplicate name is ignored",  
+            let g = addVariable "a" (addVariable "a" emptyGraph) 
+            in length (getVariables g) == 1
+        ),
+
+        ("addVariable: two unique names produce 2 nodes",
+            let g = addVariable "b" (addVariable "a" emptyGraph)
+            in length (getVariables g) == 2
+        ),
+
+        ("addVariable: new node has empty adj list",
+            adjOf "a" (addVariable "a" emptyGraph) == []
+        ),
+
+        -- getVariable
+        ("getVariable: returns Just for a present variable",
+            isJust (getVariable "a" (addVariable "a" emptyGraph))
+        ),
+
+        ("getVariable: returns Nothing for an absent variable",
+            isNothing (getVariable "z" (addVariable "a" emptyGraph))
+        ),
+
+        ("getVariable: correct variable is returned from multi-node graph",
+            let g = addVariable "b" (addVariable "a" emptyGraph)
+            in case getVariable "b" g of
+                Nothing -> False
+                Just var -> getVarName var == "b"
+        ),
+
+        -- getVariables
+        ("getVariables: returns all nodes",
+            let g = addVariable "c" (addVariable "b" (addVariable "a" emptyGraph))
+            in  sort (map getVarName (getVariables g)) == ["a", "b", "c"]
+        ),
+        ("addEdge: both variables appear in graph",
+            let g = addEdge "a" "b" emptyGraph
+            in  varNames g == ["a", "b"]
+        ),
+
+        ("addEdge: a is in b's adjacency list",
+            let g = addEdge "a" "b" emptyGraph
+            in  "a" `elem` adjOf "b" g
+        ),
+        ("addEdge: b is in a's adjacency list",
+            let g = addEdge "a" "b" emptyGraph
+            in  "b" `elem` adjOf "a" g
+        ),
+        ("addEdge: edge is symmetric (hasEdge helper)",
+            hasEdge "a" "b" (addEdge "a" "b" emptyGraph)
+        ),
+        ("addEdge: pre-existing nodes get edge added",
+            let g = addEdge "a" "b"
+                        (addVariable "b" (addVariable "a" emptyGraph))
+            in hasEdge "a" "b" g
+        ),
+        ("addEdge: unrelated node is unaffected",
+            let g = addEdge "a" "b" (addVariable "c" emptyGraph)
+            in  adjOf "c" g == []
+        ),
+        ("addEdge: adding same edge twice is idempotent",
+            let g = addEdge "a" "b" (addEdge "a" "b" emptyGraph)
+            in  length (adjOf "a" g) == 1 && length (adjOf "b" g) == 1
+        ),
+        ("addEdge: three mutually-interfering variables",
+            let g = addEdge "a" "c" (addEdge "b" "c" (addEdge "a" "b" emptyGraph))
+            in  hasEdge "a" "b" g && hasEdge "b" "c" g && hasEdge "a" "c" g
+        ),
+
+        -- showGraph
+        ("showGraph: empty graph shows empty message",
+            showGraph emptyGraph == "   (empty graph)"
+        ),
+
+        ("showGraph: non-empty graph contains variable names",
+            let g = addEdge "a" "b" emptyGraph
+            in  "a" `elem` lines (showGraph g) ||
+                any (\ l -> "a" `elem` words l) (lines (showGraph g))
+        )
+    ]
+
+-------------------------
+-- Graph Builder Tests --
+-------------------------
+
+graphBuilderTests :: [(String, Bool)]
+graphBuilderTests = 
+    [
+        -- Edge Cases
+        --------------------------------------------
+        ("empty program, no live-outs: empty graph",
+        let g = buildGraph (newInstrSeq [] [])
+        in  null (getVariables g)),
+
+        ("empty program, one live-out: one node, no edges",
+        let g = buildGraph (newInstrSeq [] ["x"])
+        in  varNames g == ["x"] && adjOf "x" g == []),
+
+        ("empty program, two live-outs: both nodes, one edge",
+        let g = buildGraph (newInstrSeq [] ["x", "y"])
+        in  varNames g == ["x", "y"] && hasEdge "x" "y" g),
+
+        ("empty program, three live-outs: all pairs connected",
+        let g = buildGraph (newInstrSeq [] ["x", "y", "z"])
+        in  hasEdge "x" "y" g && hasEdge "y" "z" g && hasEdge "x" "z" g),
+
+        ("single copy instr, dest not live-out: only src node",
+        -- x = y  ;  live: (none)
+        -- y is used (last use) → added; x is dest → defined, not live above
+        let g = buildGraph (newInstrSeq [mkCopy "x" (Var "y")] [])
+        in  isJust (getVariable "y" g)),
+
+        ("single copy instr from literal: no variable nodes beyond live-outs",
+        -- x = 5  ;  live: (none)
+        -- 5 is a Lit, not a Var; x is dest, never used → no nodes at all
+        let g = buildGraph (newInstrSeq [mkCopy "x" (Lit 5)] [])
+        in  null (getVariables g)),
+
+        ("unary instr: src and dest both in graph",
+        -- t1 = -a  ;  live: t1
+        let g = buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"])
+        in  isJust (getVariable "a" g) && isJust (getVariable "t1" g)),
+
+        ("unary instr: src interferes with live-out dest",
+        -- t1 = -a  ;  live: t1
+        -- When we see src 'a' it is live simultaneously with live-out 't1'
+        let g = buildGraph (newInstrSeq [mkUnaryOp "t1" (Var "a")] ["t1"])
+        in  hasEdge "a" "t1" g),
+
+        -- 2-Instruction Sequences
+        ----------------------------------------------------------
+        ("two instrs: variable defined then used has no self-edge",
+        let g = buildGraph (newInstrSeq
+                    [ mkBinOp "t1" (Var "a") Add (Lit 1) -- t1 = a + 1 | t1 added to live={b} -> t1 <-> b
+                    , mkBinOp "b"  (Var "t1") Mul (Lit 2) -- b = t1 * 2 | a added to live={b,t1} -> a <-> b, a <-> t1
+                    ] ["b"]) -- live: b
+        in  hasEdge "t1" "b" g && hasEdge "a" "t1" g && hasEdge "a" "b" g),
+
+        ("two instrs: variable used twice shares one node",
+        -- Both src1 and src2 are Var "a" so should produce exactly one node for a
+        let g = buildGraph (newInstrSeq
+                    [ mkBinOp "t1" (Var "a") Add (Var "a") -- t1 = a + a 
+                    ] ["t1"]) -- live: t1 
+        in  length (filter ((== "a") . getVarName) (getVariables g)) == 1),
+
+        -- Full program tests
+        ------------------------------------------------
+        ("test program: all 8 variables appear as nodes",
+        sort (varNames testGraph) == sort ["a", "b", "c", "d", "t1", "t2", "t3", "t4"]),
+
+        -- Edges confirmed by hand-traced liveness analysis
+        ("test program: c interferes with d",
+        hasEdge "c" "d" testGraph),
+
+        ("test program: t4 interferes with d",
+        hasEdge "t4" "d" testGraph),
+
+        ("test program: b interferes with c",
+        hasEdge "b" "c" testGraph),
+
+        ("test program: b interferes with t4",
+        hasEdge "b" "t4" testGraph),
+
+        ("test program: t2 interferes with c",
+        hasEdge "t2" "c" testGraph),
+
+        ("test program: t2 interferes with b",
+        hasEdge "t2" "b" testGraph),
+
+        ("test program: t3 interferes with c",
+        hasEdge "t3" "c" testGraph),
+
+        ("test program: t3 interferes with b",
+        hasEdge "t3" "b" testGraph),
+
+        ("test program: t3 interferes with t2",
+        hasEdge "t3" "t2" testGraph),
+
+        ("test program: a interferes with c",
+        hasEdge "a" "c" testGraph),
+
+        ("test program: a interferes with t2",
+        hasEdge "a" "t2" testGraph),
+
+        ("test program: a interferes with t3",
+        hasEdge "a" "t3" testGraph),
+
+        ("test program: t1 interferes with c",
+        hasEdge "t1" "c" testGraph),
+
+        ("test program: t1 interferes with t2",
+        hasEdge "t1" "t2" testGraph),
+
+        ("test program: t1 interferes with a",
+        hasEdge "t1" "a" testGraph),
+
+        -- Edges that should not exist
+        ---------------------------------------------
+        ("test program: a does NOT interfere with d",
+        not (hasEdge "a" "d" testGraph)),
+
+        ("test program: a does NOT interfere with b",
+        not (hasEdge "a" "b" testGraph)),
+
+        ("test program: t1 does NOT interfere with t3",
+        not (hasEdge "t1" "t3" testGraph)),
+
+        ("test program: t1 does NOT interfere with b",
+        not (hasEdge "t1" "b" testGraph)),
+
+        ("test program: t1 does NOT interfere with t4",
+        hasEdge "t1" "t4" testGraph == False),
+
+        ("test program: d has exactly 2 neighbours (c and t4)",
+        sort (adjOf "d" testGraph) == ["c", "t4"]),
+
+        ("test program: c has exactly 7 neighbours (all others except itself)",
+        sort (adjOf "c" testGraph) == sort ["a", "b", "d", "t1", "t2", "t3", "t4"]),
+
+        -- Correct Liveness
+        --------------------------------------------------------------
+        ("dead variable (defined, never used, not live-out): no node",
+        -- x is defined but never used and not live-out -> should have no node
+        let g = buildGraph (newInstrSeq [mkCopy "x" (Lit 1)] -- x = 1
+                            [])                              -- live: (none)
+        in  isNothing (getVariable "x" g)),
+
+        ("live-out variable not defined in block: still has a node",
+        let g = buildGraph (newInstrSeq [] ["x"]) -- live: x  (x is used by something after this block)
+        in  isJust (getVariable "x" g))
     ]

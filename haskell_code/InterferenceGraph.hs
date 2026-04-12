@@ -7,7 +7,7 @@
 
 module InterferenceGraph (
     IGraph,
-    emtpyGraph,
+    emptyGraph,
     addVariable,
     addEdge,
     getVariables,
@@ -38,7 +38,7 @@ addEdge:: String -> String -> IGraph -> IGraph
 addEdge name1 name2 graph  =
     let graph'              = addVariable name1 (addVariable name2 graph) -- Graph with name 1 and 2 added
         IGraph vars'        = graph'
-        updated             = map updateVar vars'
+        updated             = map updatedVar vars'
     in IGraph updated
     where
         updatedVar v                                        -- Updates adjacency lists
@@ -47,13 +47,15 @@ addEdge name1 name2 graph  =
             | otherwise             = v
 
 -- | Return all variable nodes in the graph
-getVariables :: IGraph -> [Variables]
+getVariables :: IGraph -> [Variable]
 getVariables (IGraph vars)  = vars
 
 -- | Look up a variable node by name. Returns nothing if no such variable
 --   exists in the graph
 getVariable :: String -> IGraph -> Maybe Variable
-getVariable name (IGraph vars) = find ((== name) . getVarName) vars
+getVariable name (IGraph vars) = case filter ((== name) . getVarName) vars of
+    (v:_) -> Just v
+    []    -> Nothing
 
 -- | Human readable interference table: one variable per line,
 --   listing its interfering neighbours
@@ -64,5 +66,5 @@ showGraph (IGraph vars)
 
 -- | Derived Show calls showGraph so printing an IGraph in GHCI
 --   gives the same formatted output.
-instance show IGraph where
+instance Show IGraph where
     show = showGraph

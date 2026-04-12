@@ -11,7 +11,7 @@ buildGraph instrSeq =
     let instrs          = getInstrs instrSeq
         liveOut         = getLiveOut instrSeq
         initial         = (liveOut, initialGraph liveOut)
-        (_, finalGraph) = foldr processInstr initial isntrs 
+        (_, finalGraph) = foldr processInstr initial instrs 
     in finalGraph
 
 initialGraph :: [String] -> IGraph
