@@ -8,10 +8,7 @@
 module TestThreeAddr where
 
 import ThreeAddr
-import Control.Exception (evaluate, try, SomeException)
-
--- | A single test case: name, pass/fail, actual output, expected output
-data TestResult = TestResult String Bool String String
+import TestUtils
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()
@@ -37,48 +34,6 @@ runTests = do
         ++ " | PASSED: " ++ show passed
         ++ " | FAILED: " ++ show failed)
     putStrLn "========================================="
-
--- | Prints a single test result as PASS or FAIL
-printResult :: TestResult -> IO ()
-printResult (TestResult name True actual _) =
-    putStrLn ("  PASS - " ++ name ++ " => " ++ cleanResults actual)
-printResult (TestResult name False actual expected) = do
-    putStrLn ("  FAIL - " ++ name)
-    putStrLn ("        Expected: " ++ cleanResults expected)
-    putStrLn ("        Actual:   " ++ cleanResults actual)
-
--- | Moves through list of test results and prints each
-printAllResults :: [TestResult] -> IO ()
-printAllResults [] = return ()
-printAllResults (x:xs) = do
-    printResult x
-    printAllResults xs
-
--- | Replaces newline characters with visible \n for clean output
-cleanResults :: String -> String
-cleanResults [] = []
-cleanResults ('\n':rest) = '\\' : 'n' : cleanResults rest
-cleanResults (c:rest) = c : cleanResults rest
-
--- | Compares show output of a value to an expected string
-showTest :: (Show a) => String -> a -> String -> TestResult
-showTest name actual expected =
-    TestResult name (show actual == expected) (show actual) expected
-
--- | Compares a string value directly to an expected string
-strTest :: String -> String -> String -> TestResult
-strTest name actual expected =
-    TestResult name (actual == expected) actual expected
-
--- | Checks that two values are equal
-eqTest :: (Show a, Eq a) => String -> a -> a -> TestResult
-eqTest name actual expected =
-    TestResult name (actual == expected) (show actual) (show expected)
-
--- | Checks that two values are not equal
-notEqTest :: (Show a, Eq a) => String -> a -> a -> TestResult
-notEqTest name val1 val2 =
-    TestResult name (val1 /= val2) (show val1) ("not " ++ show val2)
 
 -------------------------------------------------------
 -- All tests

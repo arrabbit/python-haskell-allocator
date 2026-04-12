@@ -41,11 +41,11 @@ allocate graph numRegs = distribute (getVariables graph) numRegs
 --
 --   Returns: a list of all valid colour solutions for the given variables
 distribute :: [Variable] -> Int -> [ColourSol]
-distribute [] _ = [ColourSol]
+distribute [] _ = [[]]
 distribute (var:rest) numRegs =  
     [ (getVarName var, colour) : solRest   -- builds list of solutions
     | solRest <- distribute rest numRegs   -- solve the remaining variables
-    , colour  <- [0 .. (numReg - 1)]       -- try each register
+    , colour  <- [0 .. (numRegs - 1)]       -- try each register
     , isViable colour var solRest          -- checks for conflicts
     ]
 
@@ -62,7 +62,7 @@ isViable :: Int -> Variable -> ColourSol -> Bool
 isViable colour var solRest = all noConflict (getAdjacent var)
     -- Checks one neighbour for conflict
     where noConflict neighbour = case lookup neighbour solRest of
-        -- If the neighbour has been coloured
-        Just c -> c /= colour  -- checks if colours match
-        -- If the neighbour hasn't been coloured
-        Nothing -> True
+                                     -- If the neighbour has been coloured
+                                     Just c -> c /= colour  -- checks if colours match
+                                     -- If the neighbour hasn't been coloured
+                                     Nothing -> True

@@ -24,10 +24,10 @@ def assert_get_type():
     assert Token.get_type("=").value == "equality", "'=' must be of TokenType 'equality'"
 
     try:
-        actual_result = Token.get_type("t")
+        Token.get_type("t")
+        print("FAILED: 't' should have raised TypeError but didn't")
     except TypeError:
-        if actual_result is TypeError:
-            print("PASSED: 't' correctly raised TypeError")
+        print("PASSED: 't' correctly raised TypeError")
     except Exception as e:
         print(f"FAILED: 't' raised unexpected exception: {e}")
 

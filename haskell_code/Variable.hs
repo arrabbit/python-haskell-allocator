@@ -13,7 +13,7 @@ data Variable = Var String [String]
 
 
 newVariable:: String -> Variable
-newVariable name = Var name []      -- Emtpy list is adjacent nodes
+newVariable name = Var name []      -- Empty list is adjacent nodes
 
 getVarName:: Variable -> String
 getVarName (Var name _) = name

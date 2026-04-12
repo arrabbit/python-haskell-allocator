@@ -8,6 +8,7 @@ Date: March 27, 2026
 """
 
 from enum import Enum
+from typing import Union
 
 class AsmOperandMode(Enum):
     """Represents the addressing mode of an assembly operand."""
@@ -44,7 +45,6 @@ class AsmRegister:
             reg_num: The register number (integer >= 0).
         """
         self.reg_num = reg_num
-        self.reg_num = reg_num
 
     def __str__(self):
         """
@@ -56,7 +56,7 @@ class AsmRegister:
 
 class AsmOperand:
     """Represents an operand in an assembly instruction."""
-    def __init__(self, mode: AsmOperandMode, val: AsmRegister | AsmVariable | int):
+    def __init__(self, mode: AsmOperandMode, val: Union["AsmRegister", "AsmVariable", int]):
         """
         Initializes an AsmOperand instance.
         Args:
@@ -130,7 +130,7 @@ class AsmInstList:
         self.instructions = []      # The assembly instructions
         self.live_on_exit = []      # List of variables that are live on exit
         if num_regs < 0:
-            raise ValueError(f"Invalid Number of Register: {num_regs}. Must allocation >= 0 registers.")
+            raise ValueError(f"Invalid Number of Register: {num_regs}. Must allocate >= 0 registers.")
         else:
             self.num_regs = num_regs    # The number of available registers. Each must be stored back
 
@@ -141,9 +141,8 @@ class AsmInstList:
             str: All instructions, one per line, indented.
         """
         string = ""
-        for i, inst in enumerate(self.instructions):
+        for inst in self.instructions:
             string += f"    {str(inst)}\n"
-        string += ""
         return string
     
     def add_inst(self, inst: AsmInst):
@@ -167,13 +166,11 @@ class AsmInstList:
         Raises:
             IndexError: If the index is out of bounds.
         """
-        try:
-            if 0 <= index < len(self.instructions):
-                return self.instructions.pop(index)
-        except IndexError:
-            raise IndexError(f"Index: {index}, is out of bounds")
+        if 0 <= index < len(self.instructions):
+            return self.instructions.pop(index)
+        raise IndexError(f"Index: {index}, is out of bounds")
         
-    def set_live_on_exit(self, live_var: AsmInst):
+    def set_live_on_exit(self, live_var: list):
         """
         Sets the list of variables that are live on exit.
         Args:

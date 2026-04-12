@@ -1,9 +1,12 @@
 -- | InterferenceGraph.hs
 --
--- ADT representing the interference graph for register allocation.
--- Each node is a Variable; and edge between two nodes means those two
--- variables are simultaneously live at some point in the code and so
--- cannot share a register.
+--   ADT representing the interference graph for register allocation.
+--   Each node is a Variable; and edge between two nodes means those two
+--   variables are simultaneously live at some point in the code and so
+--   cannot share a register.
+--
+--   Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
+--   Date: April 8, 2026
 
 module InterferenceGraph (
     IGraph,
@@ -16,9 +19,9 @@ module InterferenceGraph (
 ) where
 
 import Variable (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
-import Data.String (String)
+import Data.List (find)
 
-newtype IGraph = IGraph [Variable]
+data IGraph = IGraph [Variable]
     deriving (Eq)
 
 emptyGraph:: IGraph

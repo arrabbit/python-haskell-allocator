@@ -128,6 +128,23 @@ class Parser:
 
         return unary_op, src1_token.value
 
+    def _consume_binary_operand(self) -> Tuple[str, str]:
+        """
+        Consumes a binary operator token followed by a variable or literal
+        operand from the token stream.
+        Returns:
+            tuple: A pair (operator, src2) representing the consumed
+                operator string and second operand value.
+        Raises:
+            ValueError: If the token after the operator is not a variable
+                or literal.
+        """
+        operator = self.get_next_token().value
+        src2_token = self.get_next_token()
+        if src2_token.type not in (TokenType.VAR, TokenType.LIT):
+            raise ValueError("Expected second operand after operator")
+        return operator, src2_token.value
+
     def _parse_second_operand(self, existing_op) -> Tuple[Optional[str], Optional[str]]:
         """
         Parses the optional binary operator and second operand
@@ -147,20 +164,10 @@ class Parser:
         # Unary instructions (x = -y) cannot have a second binary operator
         if existing_op:
             return existing_op, None
-        operator = None
-        src2 = None
         next_tok = self.peek_current_token()
-        
         if next_tok and next_tok.type == TokenType.OP:
-            operator = self.get_next_token().value
-            src2_token = self.get_next_token()
-
-            if src2_token.type not in (TokenType.VAR, TokenType.LIT):
-                raise ValueError("Expected second operand after operator")
-            
-            src2 = src2_token.value
-
-        return operator, src2
+            return self._consume_binary_operand()
+        return None, None
 
     def handle_live_statement(self):
         """
@@ -185,6 +192,18 @@ class Parser:
 
         self.code_list.set_live_on_exit(live_vars)
 
+    def _collect_used_vars(self) -> set:
+        """Return the set of all variable names used in the instruction list."""
+        used = set()
+        for inst in self.code_list.instructions:
+            if inst.dest:
+                used.add(inst.dest)
+            if inst.src1 and not inst.src1.isdigit():
+                used.add(inst.src1)
+            if inst.src2 and not inst.src2.isdigit():
+                used.add(inst.src2)
+        return used
+
     def semantic_check(self, live_vars):
         """
         Validates that every variable declared live on exit actually
@@ -198,25 +217,21 @@ class Parser:
             ValueError: If any variable in live_vars is not used in
                 the code.
         """
-        used_vars = set()
-        for inst in self.code_list.instructions:
-            # Add destination variable
-            if inst.dest:
-                used_vars.add(inst.dest)
-            # Add source 1 variables (ignoring int literals)
-            if inst.src1 and not inst.src1.isdigit():
-                used_vars.add(inst.src1)
-            # Add source 2 variables (ignoring int literals)
-            if inst.src2 and not inst.src2.isdigit():
-                used_vars.add(inst.src2)
-        
-        # Checks each live on exit variable is actually used in the code
+        used_vars = self._collect_used_vars()
         for var in live_vars:
             if var not in used_vars:
                 raise ValueError(
                     f"Semantic error: Live variable '{var}' is not used in the code.")
 
-        return        
+    def _parse_additional_vars(self, variables: list) -> None:
+        """Consume comma-separated VAR tokens and append them to variables."""
+        while True:
+            token = self.peek_current_token()
+            if token and token.type == TokenType.COM:
+                self.get_next_token()
+                variables.append(self.get_next_token(TokenType.VAR).value)
+            else:
+                break
 
     def _collect_variable_list(self) -> List[str]:
         """
@@ -228,26 +243,11 @@ class Parser:
         """
         variables = []
 
-        # Checks for zero instructions in input file
         token = self.peek_current_token()
-        # If token is empty or not a variable ('/n'), return empty list
-        if token == None or token.type != TokenType.VAR:
+        if token is None or token.type != TokenType.VAR:
             return variables
 
-        # There is at least one variable, parse and add to list
-        first = self.get_next_token(TokenType.VAR)
-        variables.append(first.value)
-
-        # Continue as long as we find commas separating variables
-        while True:
-            token = self.peek_current_token()
-            if token and token.type == TokenType.COM:
-                self.get_next_token() 
-                var = self.get_next_token(TokenType.VAR)
-                variables.append(var.value)
-            else:
-                break
-
+        variables.append(self.get_next_token(TokenType.VAR).value)
+        self._parse_additional_vars(variables)
         return variables
     
-    #Testing for live works regardly of if ther is a space between the live variables, you can put as many live variables as necessary 

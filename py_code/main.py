@@ -30,65 +30,64 @@ def gen_output(code_list, color, num_registers):
     try:
         asm = generate_assembly(code_list, color, num_registers)
         print("Assembly code generated successfully.")
-            
+
         output_dir = "test_output"
         out_file_path = os.path.join(output_dir, "asm_out.s")
         with open(out_file_path, "w") as out_file:
             out_file.write(str(asm))
-        print(f"Assembly code written to '{out_file_path}' successfully.")    
-        #print(asm) WAS USED FOR TESTING
+        print(f"Assembly code written to '{out_file_path}' successfully.")
     except Exception as e:
         print(f"Error during assembly generation: {e}", file=sys.stderr)
         sys.exit(1)
 
-    return
 
-def main():
-    """
-    Main entry point. Validates command-line arguments, then
-    orchestrates tokenization, parsing, interference graph
-    construction, register allocation, and assembly code
-    generation.
-
-    Returns:
-        None
-    """
-    # Check for correct number of command-line arguments
-    #       (Ex. main.py <register #> <input_file>)
-    if len(sys.argv) != 3:
+def _validate_args(args) -> tuple:
+    """Return (num_regs_str, filename) or exit with usage message."""
+    if len(args) != 3:
         print("Error: Incorrect number of arguments.", file=sys.stderr)
         sys.exit(1)
-    
-    num_registers_str = sys.argv[1]
-    infile_name = sys.argv[2]
+    return args[1], args[2]
 
-    # Check if the number of registers is a valid integer
+
+def _parse_num_registers(s: str) -> int:
+    """Parse and validate the register count string; exit on error."""
     try:
-        num_registers = int(num_registers_str)
-        if num_registers <= 0:
+        num = int(s)
+        if num <= 0:
             print(f"Error: Input for <num_registers> must be positive. "
-                  f"Given: {num_registers}", file=sys.stderr)
+                  f"Given: {num}", file=sys.stderr)
             sys.exit(1)
+        return num
     except ValueError:
         print(f"Error: Input for <num_registers_str> must be a valid integer. "
-              f"Given: '{num_registers_str}'", file=sys.stderr)
+              f"Given: '{s}'", file=sys.stderr)
         sys.exit(1)
 
-    # Check if the input file is valid
-    if not os.path.isfile(infile_name):
-        print(f"Error: Input file '{infile_name}' is invalid.", file=sys.stderr)
+
+def _validate_input_file(path: str) -> None:
+    """Exit with error if path does not point to an existing file."""
+    if not os.path.isfile(path):
+        print(f"Error: Input file '{path}' is invalid.", file=sys.stderr)
         sys.exit(1)
-    
-    # Initialize the tokenizer and tokenize the input file
-    try: #Tokenize
-        tokenizer = Tokenizer(infile_name)
+
+
+def _tokenize_and_parse(filename: str):
+    """
+    Run tokenizer and parser on filename; exit on any error.
+    Args:
+        filename: Path to the input file to tokenize and parse.
+    Returns:
+        ThreeAdrInstList: The parsed instruction list.
+    """
+    try:
+        tokenizer = Tokenizer(filename)
         tokenizer.tokenize()
         print("Input tokenized successfully.")
         print(tokenizer)
     except Exception as e:
         print(f"Error during tokenization: {e}", file=sys.stderr)
         sys.exit(1)
-    try: #Parsing
+    try:
         parser = Parser(tokenizer.tokens)
         parser.parse()
         print("Tokens parsed successfully.")
@@ -96,10 +95,21 @@ def main():
     except Exception as e:
         print(f"Error during parser: {e}", file=sys.stderr)
         sys.exit(1)
+    return parser.code_list
 
-    # Build the interference graph from the instruction list
+
+def _build_and_allocate(code_list, num_registers: int) -> dict:
+    """
+    Build interference graph and run register allocator; exit if no
+    valid colouring exists.
+    Args:
+        code_list: A ThreeAdrInstList to allocate registers for.
+        num_registers: The number of available CPU registers.
+    Returns:
+        dict: A mapping of variable names to assigned register numbers.
+    """
     try:
-        graph = build_interfere_graph(parser.code_list)
+        graph = build_interfere_graph(code_list)
         print("Interference graph built successfully.")
         print(graph)
     except Exception as e:
@@ -114,11 +124,28 @@ def main():
         for var, reg in graph.color.items():
             print(f"  {var} -> R{reg}")
     else:
-        print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",  file=sys.stderr)
+        print(f"Failure: Unable to color (allocate) nodes to {num_registers} registers.",
+              file=sys.stderr)
         sys.exit(1)
+    return graph.color
 
-    # Generate assembly code from the IR list and register allocation
-    gen_output(parser.code_list, graph.color, num_registers)
+
+def main():
+    """
+    Main entry point. Validates command-line arguments, then
+    orchestrates tokenization, parsing, interference graph
+    construction, register allocation, and assembly code
+    generation.
+    Returns:
+        None
+    """
+    num_registers_str, infile_name = _validate_args(sys.argv)
+    num_registers = _parse_num_registers(num_registers_str)
+    _validate_input_file(infile_name)
+    code_list = _tokenize_and_parse(infile_name)
+    color = _build_and_allocate(code_list, num_registers)
+    gen_output(code_list, color, num_registers)
+
 
 if __name__ == "__main__":
     main()
