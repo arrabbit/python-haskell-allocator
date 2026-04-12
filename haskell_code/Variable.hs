@@ -12,16 +12,16 @@ data Variable = Var String [String]
     deriving (Eq)
 
 
-newVariable:: String -> Variable
+newVariable :: String -> Variable
 newVariable name = Var name []      -- Empty list is adjacent nodes
 
-getVarName:: Variable -> String
+getVarName :: Variable -> String
 getVarName (Var name _) = name
 
-getAdjacent:: Variable -> [String]
+getAdjacent :: Variable -> [String]
 getAdjacent (Var _ adj) = adj
 
-addAdjacent:: String -> Variable -> Variable
+addAdjacent :: String -> Variable -> Variable
 addAdjacent neighbour (Var name adjs) = Var name (nub (neighbour : adjs))
 
 instance Show Variable where
