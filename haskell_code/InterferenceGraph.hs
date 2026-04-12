@@ -19,7 +19,6 @@ module InterferenceGraph (
 ) where
 
 import Variable (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
-import Data.List (find)
 
 data IGraph = IGraph [Variable]
     deriving (Eq)
@@ -56,7 +55,9 @@ getVariables (IGraph vars)  = vars
 -- | Look up a variable node by name. Returns nothing if no such variable
 --   exists in the graph
 getVariable :: String -> IGraph -> Maybe Variable
-getVariable name (IGraph vars) = find ((== name) . getVarName) vars
+getVariable name (IGraph vars) = case filter ((== name) . getVarName) vars of
+    (v:_) -> Just v
+    []    -> Nothing
 
 -- | Human readable interference table: one variable per line,
 --   listing its interfering neighbours
