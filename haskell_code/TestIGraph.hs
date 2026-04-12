@@ -14,9 +14,9 @@ import TestUtils         (TestResult, printAllResults, printSummary,
 
 main :: IO ()
 main = do
-    putStrLn "========================================="
-    putStrLn " InterferenceGraph.hs - Automated Test Results"
-    putStrLn "========================================="
+    putStrLn "====================================="
+    putStrLn " InterferenceGraph.hs - Test Results"
+    putStrLn "====================================="
     putStrLn ""
 
     printAllResults igraphTests
