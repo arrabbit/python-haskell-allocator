@@ -50,8 +50,7 @@ getType word
     | isValidVar word = [TokVar word]
     | isOnlyDigits word = [TokLit (read word)]
     | last word == ',' && isValidVar (init word) = [TokVar (init word), TokCom]
-    | otherwise = error ("Tokenizer: invalid
-                          token: " ++ word)
+    | otherwise = error ("Tokenizer: invalid token: " ++ word)
 
 -- | Evaluates a given string to determine if it is a valid variable name.
 --   Returns True if the string is a valid variable name, otherwise returns

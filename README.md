@@ -33,6 +33,9 @@ To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the comm
 To run `ThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci ThreeAddr.hs
 
+To run `Tokenizer.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci Tokenizer.hs
+
 ### Test Module Instructions
 To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci TestAsmInstr.hs
@@ -40,6 +43,10 @@ To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the 
 
 To run `TestThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
     ghci TestThreeAddr.hs
+    ghci> runTests
+
+To run `TestTokenizer.hs`, while in <u>haskell_code</u> directory, load with the command:
+    ghci TestTokenizer.hs
     ghci> runTests
 
 To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the command:
