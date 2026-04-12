@@ -5,7 +5,7 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 -- Date: April 12, 2026
  
-Module Parser
+module Parser
     ( parse
     ) where
 
@@ -19,11 +19,11 @@ import ThreeAddr (InstrSeq, Instr, Operand(..), Op(..), mkBinOp, mkUnaryOp,
 --   after it.
 parse :: [Token] -> InstrSeq
 parse tokens = let (instrTokens, liveVars) = split tokens
-                   instrs = parseInstrs instrTokens
-               in if null (validateLiveVars instrs liveVars)
-                  then newInstrSeq isntrs liveVars
+                   instrs = parseAllInstrs instrTokens
+               in if null (validateLive instrs liveVars)
+                  then newInstrSeq instrs liveVars
                   else error ("Parser: live variable(s) not defined in code: "
-                              ++ show (validateLiveVars instrs liveVars))
+                              ++ show (validateLive instrs liveVars))
 
 -- | Separates the instruction tokens from the live variable list.
 split :: [Token] -> ([[Token]],[String])
