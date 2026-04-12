@@ -25,24 +25,16 @@ runTests = do
     printAllResults allResults
 
     -- Print summary
-    let total = length allResults
-    let passed = length (filter (\(TestResult _ b _ _) -> b) allResults)
-    let failed = total - passed
-    putStrLn "" -- Empty line for spacing
-    putStrLn "========================================="
-    putStrLn ("  TOTAL: " ++ show total
-        ++ " | PASSED: " ++ show passed
-        ++ " | FAILED: " ++ show failed)
-    putStrLn "========================================="
-
--------------------------------------------------------
--- Tests
--------------------------------------------------------
+    printSummary allResults
 
 tests :: [TestResult]
 tests = registerTests ++ srcOpTests ++ dstOpTests
     ++ arithInstrTests ++ movInstrTests ++ programTests ++ equalTests
 
+
+-------------------------------------------------------
+-- All Tests
+-------------------------------------------------------
 -- Register tests
 registerTests :: [TestResult]
 registerTests = 

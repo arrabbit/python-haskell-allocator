@@ -24,15 +24,7 @@ runTests = do
     putStrLn ""
     let results = runAllTests
     printAllResults results
-    let total  = length results
-        passed = length (filter (\(TestResult _ b _ _) -> b) results)
-        failed = total - passed
-    putStrLn ""
-    putStrLn "========================================="
-    putStrLn ("  TOTAL: " ++ show total
-        ++ " | PASSED: " ++ show passed
-        ++ " | FAILED: " ++ show failed)
-    putStrLn "========================================="
+    printSummary results
 
 runAllTests :: [TestResult]
 runAllTests =

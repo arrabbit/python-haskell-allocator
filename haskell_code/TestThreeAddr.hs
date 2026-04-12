@@ -25,19 +25,7 @@ runTests = do
     printAllResults results
 
     -- Print summary
-    let total = length results
-    let passed = length (filter (\(TestResult _ b _ _) -> b) results)
-    let failed = total - passed
-    putStrLn ""
-    putStrLn "========================================="
-    putStrLn ("  TOTAL: " ++ show total
-        ++ " | PASSED: " ++ show passed
-        ++ " | FAILED: " ++ show failed)
-    putStrLn "========================================="
-
--------------------------------------------------------
--- All tests
--------------------------------------------------------
+    printSummary results
 
 runAllTests :: [TestResult]
 runAllTests =
@@ -53,7 +41,6 @@ runAllTests =
 -------------------------------------------------------
 -- Operand tests
 -------------------------------------------------------
-
 operandTests :: [TestResult]
 operandTests =
     [ strTest   "Operand: variable operand"
@@ -76,7 +63,6 @@ operandTests =
 -------------------------------------------------------
 -- Operator display tests
 -------------------------------------------------------
-
 operatorTests :: [TestResult]
 operatorTests =
     [ strTest   "Operator: ADD"
@@ -96,7 +82,6 @@ operatorTests =
 -------------------------------------------------------
 -- Instruction constructor tests
 -------------------------------------------------------
-
 instrConstructorTests :: [TestResult]
 instrConstructorTests =
     [ strTest   "Instr constructor: binary (var + lit)"
@@ -128,7 +113,6 @@ instrConstructorTests =
 -------------------------------------------------------
 -- Instruction query tests
 -------------------------------------------------------
-
 instrQueryTests :: [TestResult]
 instrQueryTests =
     [ showTest  "Instr query: getDest from binary"
@@ -172,7 +156,6 @@ instrQueryTests =
 -------------------------------------------------------
 -- Instruction type tests
 -------------------------------------------------------
-
 instrTypeTests :: [TestResult]
 instrTypeTests =
     [ strTest   "instrType: binary"
@@ -189,7 +172,6 @@ instrTypeTests =
 -------------------------------------------------------
 -- Sequence constructor and query tests
 -------------------------------------------------------
-
 seqQueryTests :: [TestResult]
 seqQueryTests =
     [ eqTest    "Sequence query: getInstrs with one instruction"
@@ -212,7 +194,6 @@ seqQueryTests =
 -------------------------------------------------------
 -- Sequence display tests
 -------------------------------------------------------
-
 seqDisplayTests :: [TestResult]
 seqDisplayTests =
     [ strTest   "Sequence display: single instruction"
@@ -241,7 +222,6 @@ seqDisplayTests =
 -------------------------------------------------------
 -- Equality tests
 -------------------------------------------------------
-
 equalityTests :: [TestResult]
 equalityTests =
     [ eqTest    "Equality: same operand"

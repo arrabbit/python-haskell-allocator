@@ -71,4 +71,4 @@ isValidVar _ = False
 --   *Note: string must have at least 1 digit to be considered all digits.
 isOnlyDigits :: String -> Bool
 isOnlyDigits [] = False                   -- base case: empty string so no digits
-isOnlyDigits digits = all isDigit digits 
+isOnlyDigits digits = all isDigit digits

@@ -10,6 +10,7 @@ module TestUtils
     ( TestResult(..)
     , printResult
     , printAllResults
+    , printSummary
     , cleanResults
     , showTest
     , strTest
@@ -36,6 +37,19 @@ printAllResults [] = return ()
 printAllResults (x:xs) = do
     printResult x
     printAllResults xs
+
+-- | Prints a pass/fail summary count for a list of test results
+printSummary :: [TestResult] -> IO ()
+printSummary results = do
+    let total = length results
+    let passed = length (filter (\(TestResult _ b _ _) -> b) results)
+    let failed = total - passed
+    putStrLn ""
+    putStrLn "========================================="
+    putStrLn ("  TOTAL: " ++ show total
+        ++ " | PASSED: " ++ show passed
+        ++ " | FAILED: " ++ show failed)
+    putStrLn "========================================="
 
 -- | Replaces newline characters with the visible text '\n' for clean console output
 cleanResults :: String -> String
