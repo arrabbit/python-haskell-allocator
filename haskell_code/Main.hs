@@ -4,6 +4,7 @@
 
 module Main where
 
+import System.Directory     (getCurrentDirectory)
 import System.Environment  (getArgs)
 import System.IO           (hPutStrLn, stderr)
 import System.Exit         (exitFailure)
@@ -28,8 +29,10 @@ main = do
 
 run :: String -> FilePath -> IO ()
 run numRegistersStr path = do
+    cwd <- getCurrentDirectory
+    let fullPath = cwd ++ "/TestInputs/" ++ path
     let numRegisters = parseNumRegs numRegistersStr
-    contents <- readInputFile path
+    contents <- readInputFile fullPath
     let instructionSeq = parse (tokenize contents)
     let graph = buildGraph instructionSeq
     let solutions = allocate graph numRegisters
@@ -42,7 +45,7 @@ run numRegistersStr path = do
             putStr   (showGraph graph)
             putStrLn "\nRegister Colouring Table:"
             putStr   (colourTable numRegisters solution)
-            writeFile (path ++ ".s") (show asmProg)
+            writeFile (fullPath ++ ".s") (show asmProg)
 
 colourTable :: Int -> ColourSol -> String
 colourTable numRegs solution =
