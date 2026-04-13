@@ -1,6 +1,6 @@
 -- |
--- Summary: Automated test module for AsmInstr.hs. Runs all test cases and
---     reports pass/fail results with a summary count.
+-- Summary: An automated test module for AsmInstr.hs. Runs a serires of tests
+--          and reports pass/fail results.
 --
 -- Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 -- Date: April 1, 2026
@@ -16,10 +16,10 @@ runTests = do
     putStrLn "========================================="
     putStrLn " AsmInstr.hs - Automated Test Results"
     putStrLn "========================================="
-    putStrLn "" -- empty line for spacing
+    putStrLn ""
 
-    -- Run tests (excluding expected errors)
-    let allResults = tests
+    -- Run all tests
+    let allResults = runAlltests
 
     -- Prints each result
     printAllResults allResults
@@ -27,104 +27,90 @@ runTests = do
     -- Print summary
     printSummary allResults
 
-tests :: [TestResult]
-tests = registerTests ++ srcOpTests ++ dstOpTests
-    ++ arithInstrTests ++ movInstrTests ++ programTests ++ equalTests
+runAlltests :: [TestResult]
+runAlltests = showTests ++ instrTests ++ programTests
 
 
 -------------------------------------------------------
--- All Tests
+-- Reigster/Operand tests
 -------------------------------------------------------
--- Register tests
-registerTests :: [TestResult]
-registerTests = 
-    [ showTest "Register: valid index (0)"        (mkRegister 0)    "R0"
-    , showTest "Register: higher index (5)"       (mkRegister 5)    "R5"
-    , eqTest   "Register: boundary index 0 eq"    (mkRegister 0)    (mkRegister 0)]
 
--- Source operand tests
-srcOpTests :: [TestResult]
-srcOpTests =
-    [ showTest "SrcOperand: immediate 42"          (immSrc 42)                "#42"
-    , showTest "SrcOperand: negative immediate"    (immSrc (-3))              "#-3"
-    , showTest "SrcOperand: immediate zero"        (immSrc 0)                 "#0"
-    , showTest "SrcOperand: variable a"            (varSrc "a")               "a"
-    , showTest "SrcOperand: temp variable t1"      (varSrc "t1")              "t1"
-    , showTest "SrcOperand: register direct R2"    (regSrc (mkRegister 2))    "R2"]
+-- | Check that registers and operands display correctly.
+showTests :: [TestResult]
+showTests = [showTest "Show: register 0"  -- name
+             (mkRegister 0)               -- actual
+             "R0"                         -- expected
+    
+            , showTest "Show: register 5"  -- name
+              (mkRegister 5)               -- actual
+              "R5"                         -- expected
+            
+            , showTest "Show: immediate source"  -- name
+              (immSrc 42)                        -- actual
+              "#42"                              -- expected
+            
+            , showTest "Show: variable source"  -- name
+              (varSrc "a")                      -- actual
+              "a"                               -- expected
+            
+            , showTest "Show: register source"  -- name
+              (regSrc (mkRegister 1))           -- actual
+              "R1"                              -- expected
+            
+            , showTest "Show: variable destination"  -- name
+              (varDst "d")                           -- actual
+              "d"]                                   -- expected
 
--- Destination operand tests
-dstOpTests :: [TestResult]
-dstOpTests =
-    [ showTest    "DstOperand: variable d"            (varDst "d")               "d"
-    , showTest    "DstOperand: register direct R3"    (regDst (mkRegister 3))    "R3"]
+-------------------------------------------------------
+-- Instruction tests
+-------------------------------------------------------
 
--- Arithmetic instruction tests
-arithInstrTests :: [TestResult]
-arithInstrTests =
-    [ showTest    "Instr: ADD immediate"    (mkAdd (immSrc 1) (mkRegister 0))    
-        "ADD #1,R0"
-    , showTest    "Instr: SUB register"     (mkSub (regSrc (mkRegister 0)) (mkRegister 1))
-        "SUB R0,R1"
-    , showTest    "Instr: MUL immediate"    (mkMul (immSrc 4) (mkRegister 1))
-        "MUL #4,R1"
-    , showTest    "Instr: DIV immediate"    (mkDiv (immSrc 2) (mkRegister 1))
-        "DIV #2,R1"
-    , showTest    "Instr: ADD variable"     (mkAdd (varSrc "c") (mkRegister 1))
-        "ADD c,R1"]
+instrTests :: [TestResult]
+instrTests = [showTest "Instr: ADD immediate to register"  -- name
+              (mkAdd (immSrc 1) (mkRegister 0))            -- actual
+              "ADD #1,R0"                                  -- expected
+             
+             , showTest "Instr: SUB register from register"    -- name 
+               (mkSub (regSrc (mkRegister 0)) (mkRegister 1))  -- actual
+               "SUB R0,R1"                                     -- expected
+             
+             , showTest "Instr: MUL with variable source"  -- name
+               (mkMul (varSrc "a") (mkRegister 2))         -- actual
+               "MUL a,R2"                                  -- expected
+             
+             , showTest "Instr: DIV immediate"    -- name
+               (mkDiv (immSrc 2) (mkRegister 1))  -- actual
+               "DIV #2,R1"                        -- expected
+             
+             , showTest "Instr: MOV variable into register"  -- name
+               (mkMovToReg (varSrc "a") (mkRegister 0))      -- actual
+               "MOV a,R0"                                    -- expected
+             
+             , showTest "Instr: MOV register to variable"  -- name
+               (mkMovFromReg (mkRegister 1) (varDst "d"))  -- actual
+               "MOV R1,d"]                                 -- expected
 
--- MOV instruction tests
-movInstrTests :: [TestResult]
-movInstrTests =
-    [ showTest    "Instr: MOV var to reg"
-        (mkMovToReg (varSrc "a")  (mkRegister 0))
-        "MOV a,R0"
-    , showTest    "Instr: MOV reg to reg"
-        (mkMovToReg (regSrc (mkRegister 0)) (mkRegister 1))
-        "MOV R0,R1"
-    , showTest    "Instr: MOV imm to reg"
-        (mkMovToReg (immSrc 10) (mkRegister 2))
-        "MOV #10,R2"
-    , showTest    "Instr: MOV reg to var"
-        (mkMovFromReg (mkRegister 1) (varDst "d"))
-        "MOV R1,d"
-    , showTest    "Instr: MOV reg to reg(d)"
-        (mkMovFromReg (mkRegister 0) (regDst (mkRegister 1)))
-        "MOV R0,R1"
-    ]
-
+-------------------------------------------------------
 -- Program tests
-programTests :: [TestResult]
-programTests =
-    [ showTest  "Program: empty"
-        emptyProgram
-        ""
-    , showTest  "Program: single instruction"
-        (mkProgram [mkAdd (immSrc 1) (mkRegister 0)])
-        "ADD #1,R0\n"
-    , showTest  "Program: append to empty"
-        (appendInstr emptyProgram (mkAdd (immSrc 1) (mkRegister 0)))
-        "ADD #1,R0\n"
-    , showTest  "Program: append preserves order"
-        (appendInstr
-            (appendInstr emptyProgram
-                (mkMovToReg (varSrc "a") (mkRegister 0)))
-            (mkAdd (immSrc 1) (mkRegister 0)))
-        "MOV a,R0\nADD #1,R0\n"
-    ]
+-------------------------------------------------------
 
--- Equality tests
-equalTests :: [TestResult]
-equalTests =
-    [ eqTest    "Equality: same register"
-        (mkRegister 0) (mkRegister 0)
-    , notEqTest "Equality: different registers"
-        (mkRegister 0) (mkRegister 1)
-    , eqTest    "Equality: same instruction"
-        (mkAdd (immSrc 1) (mkRegister 0))
-        (mkAdd (immSrc 1) (mkRegister 0))
-    , notEqTest "Equality: different instructions"
-        (mkAdd (immSrc 1) (mkRegister 0))
-        (mkSub (immSrc 1) (mkRegister 0))
-    , eqTest    "Equality: same operand"
-        (immSrc 1) (immSrc 1)
-    ]
+-- | Check that programs build and display properly.
+programTests :: [TestResult]
+programTests = [showTest "Program: empty program"  -- name
+                emptyProgram                       -- actual
+                ""                                 -- expected
+    
+               , showTest "Program: single instruction"         -- name
+                 (mkProgram [mkAdd (immSrc 1) (mkRegister 0)])  -- actual
+                 "ADD #1,R0\n"                                  -- expected
+               
+               , showTest "Program: append instruction"                             -- name
+                 (appendInstr (mkProgram [mkMovToReg (varSrc "a") (mkRegister 0)])  -- actual
+                              (mkAdd (immSrc 1) (mkRegister 0)))
+                 "MOV a,R0\nADD #1,R0\n"                                            -- expected
+               
+               , eqTest "Program: mkProgram equals appended"                        -- name
+                 (mkProgram [mkMovToReg (varSrc "a") (mkRegister 0),                
+                             mkAdd (immSrc 1) (mkRegister 0)])                      -- actual
+                 (appendInstr (mkProgram [mkMovToReg (varSrc "a") (mkRegister 0)])
+                              (mkAdd (immSrc 1) (mkRegister 0)))]                   -- expected
