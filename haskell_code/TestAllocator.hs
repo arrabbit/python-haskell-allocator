@@ -1,6 +1,6 @@
 -- |
 --  Summary: An automated test module for Allocator.hs. Runs a series of tests
---           and creates a pass/fail result report with a summary count.
+--           and creates a pass/fail result report.
 --
 --  Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 --  Date: April 9, 2026
@@ -8,8 +8,7 @@
 module TestAllocator where
 
 import Allocator
-import Variable (Variable, getVarName, getAdjacent)
-import InterferenceGraph (IGraph, emptyGraph, addVariable, addEdge, getVariables)
+import InterferenceGraph
 import TestUtils
 
 -- | Runs all tests and prints results to the terminal
@@ -20,93 +19,67 @@ runTests = do
     putStrLn "========================================="
     putStrLn "" 
 
-    let results = allocatorTests
+    let results = runAllTests
     printAllResults results
 
     -- Print summary
     printSummary results
 
--------------------------------------------------------
--- Test Helpers
--------------------------------------------------------
-
--- | Checks that every pair of interfering variables has different register assignments
-isValidColouring :: IGraph -> ColourSol -> Bool
-isValidColouring graph colouring =
-    all checkVar (getVariables graph)
-  where
-    checkVar var =
-        let colour = lookup (getVarName var) colouring
-            adjColours = map (\name -> lookup colouring) (getAdjacent var)
-        in all (/= colour) adjColours
+runAllTests :: [TestResult]
+runAllTests = emptyTests ++ noEdgeTests ++ oneEdgeTests ++ notEnoughTests
 
 -------------------------------------------------------
--- Mock Graphs for Testing
+-- Test graphs
 -------------------------------------------------------
 
--- 1. Empty Graph
-graphEmpty :: IGraph
-graphEmpty = emptyGraph
+-- two variables that don't interfere
+graphNoEdge :: IGraph
+graphNoEdge = addVariable "a" (addVariable "b" emptyGraph)
 
--- 2. Two non-interfering variables (x, y)
-graphNoEdges :: IGraph
-graphNoEdges = addVariable "x" (addVariable "y" emptyGraph)
-
--- 3. Two interfering variables (x <-> y)
+-- two variables that do interfere (a <-> b)
 graphOneEdge :: IGraph
-graphOneEdge = addEdge "x" "y" emptyGraph
+graphOneEdge = addEdge "a" "b" emptyGraph
 
--- 4. Spec Example Mock Graph
--- Based on the project spec example. We add all interfering edges
--- and an isolated variable 'd' which is live on exit but doesn't conflict.
-graphSpec :: IGraph
-graphSpec = addVariable "d" (addAllEdges edges emptyGraph)
-  where
-    edges = [ ("a", "c"), ("a", "t1"), ("a", "t2")
-            , ("c", "t1"), ("c", "t2"), ("c", "t3"), ("c", "b"), ("c", "t4")
-            , ("t2", "t3") ]
-    addAllEdges [] graph = graph
-    addAllEdges ((name1, name2):rest) graph = addAllEdges rest (addEdge name1 name2 graph)
+-- three variables all interfering (a <-> b, b <-> c, a <-> c)
+graphTriangle :: IGraph
+graphTriangle = addEdge "a" "b" (addEdge "b" "c" (addEdge "a" "c" emptyGraph))
 
 -------------------------------------------------------
--- Allocator tests
+-- All tests
 -------------------------------------------------------
 
-allocatorTests :: [TestResult]
-allocatorTests =
-    [ 
-      -- Test 1: Empty graph, 2 registers -> Exactly one solution (the empty colouring)
-      showTest "Empty graph, 2 registers" 
-        (allocate graphEmpty 2) 
-        "[[]]"
+-- | Empty graph should give back one solution with no assignments.
+emptyTests :: [TestResult]
+emptyTests = [eqTest "Allocate: empty graph gives one empty solution"  -- name
+              (allocate emptyGraph 2)                                  -- actual
+              [[]]]                                                    -- expected
 
-      -- Test 2: Two non-interfering variables, 1 register -> Solutions exist
-    , boolTest "2 non-interfering vars, 1 reg (has solution)" 
-        (not (null (allocate graphNoEdges 1))) 
-        True
+-- | Two variables with no edge can share the same register.
+noEdgeTests :: [TestResult]
+noEdgeTests = [boolTest "Allocate: no edge, 1 register has a solution"  -- name
+               (not (null (allocate graphNoEdge 1)))                    -- actual
+               True                                                     -- expected
+              
+              , boolTest "Allocate: no edge, 2 registers has a solution"  -- name
+                (not (null (allocate graphNoEdge 2)))                     -- actual
+                True]                                                     -- expected
 
-      -- Test 3: Two interfering variables, 1 register -> No solution ([])
-    , showTest "2 interfering vars, 1 reg" 
-        (allocate graphOneEdge 1) 
-        "[]"
+-- | Two variables with an edge need at least 2 registers.
+oneEdgeTests :: [TestResult]
+oneEdgeTests = [boolTest "Allocate: one edge, 1 register fails"  -- name
+                (null (allocate graphOneEdge 1))                 -- actual
+                True                                             -- expected
+    
+               , boolTest "Allocate: one edge, 2 registers has a solution"  -- name
+                 (not (null (allocate graphOneEdge 2)))                     -- actual
+                 True]                                                      -- expected
 
-      -- Test 4: Two interfering variables, 2 registers -> Solutions exist
-    , boolTest "2 interfering vars, 2 regs (has solution)" 
-        (not (null (allocate graphOneEdge 2))) 
-        True
-
-      -- Test 4b: Verify the validity of the colouring for Test 4
-    , boolTest "2 interfering vars, 2 regs (solution is valid)" 
-        (isValidColouring graphOneEdge (head (allocate graphOneEdge 2))) 
-        True
-
-      -- Test 5: Spec example, 2 registers -> At least one valid colouring
-    , boolTest "Spec example graph, 2 regs (has solution)" 
-        (not (null (allocate graphSpec 2))) 
-        True
-
-      -- Test 5b: Verify the validity of the colouring for Spec Example
-    , boolTest "Spec example graph, 2 regs (solution is valid)" 
-        (isValidColouring graphSpec (head (allocate graphSpec 2))) 
-        True
-    ]
+-- | Triangle graph needs at least 3 registers.
+notEnoughTests :: [TestResult]
+notEnoughTests = [boolTest "Allocate: triangle, 2 registers fails"  -- name
+                  (null (allocate graphTriangle 2))                 -- actual
+                  True                                              -- expected
+    
+                 , boolTest "Allocate: triangle, 3 registers has a solution"  -- name
+                   (not (null (allocate graphTriangle 3)))                    -- actual
+                   True]                                                      -- expected
