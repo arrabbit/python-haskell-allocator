@@ -55,12 +55,12 @@ specExTest = [eqTest "Parse: spec example: "      -- name
 
 -- | Unary negation test.
 unaryTest :: [TestResult]
-unaryTest = [eqTest "Parse: unary negation"                  -- name
+unaryTest = [eqTest "Parse: unary negation: "                  -- name
              (parse (tokenize "a = 5\nb = -a\nlive: a, b"))  -- actual
              testUnary]                                      -- expected
 
 -- | Empty live line test.
 empLiveTest :: [TestResult]
-empLiveTest = [eqTest "Parse: empty live line"        -- name
+empLiveTest = [eqTest "Parse: empty live line: "        -- name
                (parse (tokenize "a = b + c\nlive:"))  -- actual
                testEmptyLive]                         -- expected

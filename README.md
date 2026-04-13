@@ -25,7 +25,9 @@ This is a test.
 ```
 
 ## Haskell Solution Build Instructions
-### AsmInstr.hs
+
+
+### Run Any Module
 To run any module, while in <u>haskell_code</u> directory, load with the
 command:
     ghci <moduleName>.hs

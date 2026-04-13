@@ -50,36 +50,36 @@ graphTriangle = addEdge "a" "b" (addEdge "b" "c" (addEdge "a" "c" emptyGraph))
 
 -- | Empty graph should give back one solution with no assignments.
 emptyTests :: [TestResult]
-emptyTests = [eqTest "Allocate: empty graph gives one empty solution"  -- name
-              (allocate emptyGraph 2)                                  -- actual
-              [[]]]                                                    -- expected
+emptyTests = [eqTest "Allocate: empty graph: "  -- name
+              (allocate emptyGraph 2)           -- actual
+              [[]]]                             -- expected
 
 -- | Two variables with no edge can share the same register.
 noEdgeTests :: [TestResult]
-noEdgeTests = [boolTest "Allocate: no edge, 1 register has a solution"  -- name
-               (not (null (allocate graphNoEdge 1)))                    -- actual
-               True                                                     -- expected
+noEdgeTests = [boolTest "Allocate: no edge, 1 register"  -- name
+               (not (null (allocate graphNoEdge 1)))     -- actual
+               True                                      -- expected
               
-              , boolTest "Allocate: no edge, 2 registers has a solution"  -- name
-                (not (null (allocate graphNoEdge 2)))                     -- actual
-                True]                                                     -- expected
+              , boolTest "Allocate: no edge, 2 registers"  -- name
+                (not (null (allocate graphNoEdge 2)))      -- actual
+                True]                                      -- expected
 
 -- | Two variables with an edge need at least 2 registers.
 oneEdgeTests :: [TestResult]
-oneEdgeTests = [boolTest "Allocate: one edge, 1 register fails"  -- name
-                (null (allocate graphOneEdge 1))                 -- actual
-                True                                             -- expected
+oneEdgeTests = [boolTest "Allocate: one edge, 1 register: "  -- name
+                (null (allocate graphOneEdge 1))             -- actual
+                True                                         -- expected
     
-               , boolTest "Allocate: one edge, 2 registers has a solution"  -- name
-                 (not (null (allocate graphOneEdge 2)))                     -- actual
-                 True]                                                      -- expected
+               , boolTest "Allocate: one edge, 2 registers: "  -- name
+                 (not (null (allocate graphOneEdge 2)))        -- actual
+                 True]                                         -- expected
 
 -- | Triangle graph needs at least 3 registers.
 notEnoughTests :: [TestResult]
-notEnoughTests = [boolTest "Allocate: triangle, 2 registers fails"  -- name
-                  (null (allocate graphTriangle 2))                 -- actual
-                  True                                              -- expected
+notEnoughTests = [boolTest "Allocate: triangle, 2 registers: "  -- name
+                  (null (allocate graphTriangle 2))             -- actual
+                  True                                          -- expected
     
-                 , boolTest "Allocate: triangle, 3 registers has a solution"  -- name
-                   (not (null (allocate graphTriangle 3)))                    -- actual
-                   True]                                                      -- expected
+                 , boolTest "Allocate: triangle, 3 registers: "  -- name
+                   (not (null (allocate graphTriangle 3)))       -- actual
+                   True]                                         -- expected
