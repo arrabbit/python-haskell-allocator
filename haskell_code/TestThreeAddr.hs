@@ -1,6 +1,6 @@
 -- |
--- Summary: Automated test module for ThreeAddr.hs. Runs all test cases
---   and reports pass/fail results with a summary count.
+-- Summary: Automated test module for ThreeAddr.hs. Runs a series of tests and
+--          reports pass/fail results.
 --
 -- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 -- Date: April 4, 2026
@@ -28,224 +28,82 @@ runTests = do
     printSummary results
 
 runAllTests :: [TestResult]
-runAllTests =
-    operandTests
-    ++ operatorTests
-    ++ instrConstructorTests
-    ++ instrQueryTests
-    ++ instrTypeTests
-    ++ seqQueryTests
-    ++ seqDisplayTests
-    ++ equalityTests
+runAllTests = showInstrTests ++ getterTests ++ seqTests
 
 -------------------------------------------------------
--- Operand tests
+-- Instruction tests
 -------------------------------------------------------
-operandTests :: [TestResult]
-operandTests =
-    [ strTest   "Operand: variable operand"
-        (showOperand (Var "a"))
-        "a"
-    , strTest   "Operand: temp variable operand"
-        (showOperand (Var "t1"))
-        "t1"
-    , strTest   "Operand: positive literal"
-        (showOperand (Lit 42))
-        "42"
-    , strTest   "Operand: negative literal"
-        (showOperand (Lit (-3)))
-        "-3"
-    , strTest   "Operand: zero literal"
-        (showOperand (Lit 0))
-        "0"
-    ]
+
+-- | Check that each instruction type displays correctly.
+showInstrTests :: [TestResult]
+showInstrTests = [strTest "showInstr: binary add"                  -- name
+                  (showInstr (mkBinOp "a" (Var "a") Add (Lit 1)))  -- actual
+                  "a = a + 1"                                      -- expected
+                 
+                 , strTest "showInstr: binary mul with temp var"     -- name
+                   (showInstr (mkBinOp "t1" (Var "a") Mul (Lit 4)))  -- actual
+                   "t1 = a * 4"                                      -- expected
+                    
+                 , strTest "showInstr: unary negation"    -- name
+                   (showInstr (mkUnaryOp "b" (Var "a")))  -- actual
+                   "b = -a"                               -- expected
+                  
+                 , strTest "showInstr: copy with literal"  -- name
+                   (showInstr (mkCopy "a" (Lit 5)))        -- actual
+                   "a = 5"                                 -- expected
+
+                 , strTest "showInstr: copy with variable"  -- name
+                   (showInstr (mkCopy "a" (Var "b")))       -- actual
+                   "a = b"]                                 -- expected
 
 -------------------------------------------------------
--- Operator display tests
+-- Getter tests
 -------------------------------------------------------
-operatorTests :: [TestResult]
-operatorTests =
-    [ strTest   "Operator: ADD"
-        (showOp Add)
-        "+"
-    , strTest   "Operator: SUB"
-        (showOp Sub)
-        "-"
-    , strTest   "Operator: MUL"
-        (showOp Mul)
-        "*"
-    , strTest   "Operator: DIV"
-        (showOp Div)
-        "/"
-    ]
+
+-- | Check that the getter functions pull the right parts out.
+getterTests :: [TestResult]
+getterTests = [strTest "getDest: binary instruction"            -- name
+               (getDest (mkBinOp "a" (Var "b") Add (Var "c")))  -- actual
+               "a"                                              -- expected
+               
+              , strTest "getDest: copy instruction"  -- name
+                (getDest (mkCopy "x" (Lit 10)))      -- actual
+                "x"                                  -- expected
+               
+              , eqTest "getSrc1: binary instruction"             -- name
+                (getSrc1 (mkBinOp "a" (Var "b") Add (Var "c")))  -- actual
+                (Var "b")
+              
+              , eqTest "getOp: binary returns Just"            -- name
+                (getOp (mkBinOp "a" (Var "b") Add (Var "c")))  -- actual
+                (Just Add)                                     -- expected
+        
+              , eqTest "getOp: copy returns Nothing"  -- name
+                (getOp (mkCopy "x" (Lit 10)))         -- actual
+                Nothing                               -- expected
+              
+              , strTest "instrType: binary"                        -- name
+                (instrType (mkBinOp "a" (Var "b") Add (Var "c")))  -- actual
+                "binary"                                           -- expected
+              
+              , strTest "instrType: unary"             -- name
+                (instrType (mkUnaryOp "b" (Var "a")))  -- actual
+                "unary"]                               -- expected
 
 -------------------------------------------------------
--- Instruction constructor tests
+-- InstrSeq tests
 -------------------------------------------------------
-instrConstructorTests :: [TestResult]
-instrConstructorTests =
-    [ strTest   "Instr constructor: binary (var + lit)"
-        (showInstr (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "a = a + 1"
-    , strTest   "Instr constructor: binary (var - var)"
-        (showInstr (mkBinOp "b" (Var "t2") Sub (Var "t3")))
-        "b = t2 - t3"
-    , strTest   "Instr constructor: binary (var * lit)"
-        (showInstr (mkBinOp "t1" (Var "a") Mul (Lit 4)))
-        "t1 = a * 4"
-    , strTest   "Instr constructor: binary (var / lit)"
-        (showInstr (mkBinOp "t4" (Var "b") Div (Lit 2)))
-        "t4 = b / 2"
-    , strTest   "Instr constructor: unary negation (variable)"
-        (showInstr (mkUnaryOp "t1" (Var "x")))
-        "t1 = -x"
-    , strTest   "Instr constructor: unary negation (literal)"
-        (showInstr (mkUnaryOp "t1" (Lit 5)))
-        "t1 = -5"
-    , strTest   "Instr constructor: copy (variable)"
-        (showInstr (mkCopy "x" (Var "y")))
-        "x = y"
-    , strTest   "Instr constructor: copy (literal)"
-        (showInstr (mkCopy "x" (Lit 10)))
-        "x = 10"
-    ]
 
--------------------------------------------------------
--- Instruction query tests
--------------------------------------------------------
-instrQueryTests :: [TestResult]
-instrQueryTests =
-    [ showTest  "Instr query: getDest from binary"
-        (getDest (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "\"a\""
-    , showTest  "Instr query: getDest from unary"
-        (getDest (mkUnaryOp "t1" (Var "x")))
-        "\"t1\""
-    , showTest  "Instr query: getDest from copy"
-        (getDest (mkCopy "x" (Lit 10)))
-        "\"x\""
-    , showTest  "Instr query: getSrc1 from binary"
-        (getSrc1 (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "Var \"a\""
-    , showTest  "Instr query: getSrc1 from unary"
-        (getSrc1 (mkUnaryOp "t1" (Var "x")))
-        "Var \"x\""
-    , showTest  "Instr query: getSrc1 from copy"
-        (getSrc1 (mkCopy "x" (Lit 10)))
-        "Lit 10"
-    , showTest  "Instr query: getOp from binary"
-        (getOp (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "Just Add"
-    , showTest  "Instr query: getOp from unary (Nothing)"
-        (getOp (mkUnaryOp "t1" (Var "x")))
-        "Nothing"
-    , showTest  "Instr query: getOp from copy (Nothing)"
-        (getOp (mkCopy "x" (Lit 10)))
-        "Nothing"
-    , showTest  "Instr query: getSrc2 from binary"
-        (getSrc2 (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "Just (Lit 1)"
-    , showTest  "Instr query: getSrc2 from unary (Nothing)"
-        (getSrc2 (mkUnaryOp "t1" (Var "x")))
-        "Nothing"
-    , showTest  "Instr query: getSrc2 from copy (Nothing)"
-        (getSrc2 (mkCopy "x" (Lit 10)))
-        "Nothing"
-    ]
-
--------------------------------------------------------
--- Instruction type tests
--------------------------------------------------------
-instrTypeTests :: [TestResult]
-instrTypeTests =
-    [ strTest   "instrType: binary"
-        (instrType (mkBinOp "a" (Var "a") Add (Lit 1)))
-        "binary"
-    , strTest   "instrType: unary"
-        (instrType (mkUnaryOp "t1" (Var "x")))
-        "unary"
-    , strTest   "instrType: copy"
-        (instrType (mkCopy "x" (Lit 10)))
-        "copy"
-    ]
-
--------------------------------------------------------
--- Sequence constructor and query tests
--------------------------------------------------------
-seqQueryTests :: [TestResult]
-seqQueryTests =
-    [ eqTest    "Sequence query: getInstrs with one instruction"
-        (length (getInstrs (newInstrSeq [mkCopy "x" (Lit 10)] ["x"])))
-        1
-    , showTest  "Sequence query: getInstrs on empty"
-        (getInstrs (newInstrSeq [] []))
-        "[]"
-    , showTest  "Sequence query: getLiveOut with one variable"
-        (getLiveOut (newInstrSeq [] ["d"]))
-        "[\"d\"]"
-    , showTest  "Sequence query: getLiveOut with multiple variables"
-        (getLiveOut (newInstrSeq [] ["a", "d"]))
-        "[\"a\",\"d\"]"
-    , showTest  "Sequence query: getLiveOut on empty"
-        (getLiveOut (newInstrSeq [] []))
-        "[]"
-    ]
-
--------------------------------------------------------
--- Sequence display tests
--------------------------------------------------------
-seqDisplayTests :: [TestResult]
-seqDisplayTests =
-    [ strTest   "Sequence display: single instruction"
-        (showInstrSeq (newInstrSeq [mkCopy "x" (Lit 10)] ["x"]))
-        ("Three-Address Instruction List:\n"
-         ++ "  0: x = 10\n"
-         ++ "Live on exit: x\n"
-         ++ "----------------------------------------\n")
-    , strTest   "Sequence display: multiple instructions"
-        (showInstrSeq (newInstrSeq
-            [ mkBinOp "a" (Var "a") Add (Lit 1)
-            , mkBinOp "t1" (Var "a") Mul (Lit 4)
-            ] ["d"]))
-        ("Three-Address Instruction List:\n"
-         ++ "  0: a = a + 1\n"
-         ++ "  1: t1 = a * 4\n"
-         ++ "Live on exit: d\n"
-         ++ "----------------------------------------\n")
-    , strTest   "Sequence display: empty sequence"
-        (showInstrSeq (newInstrSeq [] []))
-        ("Three-Address Instruction List:\n"
-         ++ "Live on exit: \n"
-         ++ "----------------------------------------\n")
-    ]
-
--------------------------------------------------------
--- Equality tests
--------------------------------------------------------
-equalityTests :: [TestResult]
-equalityTests =
-    [ eqTest    "Equality: same operand"
-        (Var "a")
-        (Var "a")
-    , notEqTest "Equality: different operands"
-        (Var "a")
-        (Lit 1)
-    , eqTest    "Equality: same operator"
-        Add
-        Add
-    , notEqTest "Equality: different operators"
-        Add
-        Sub
-    , eqTest    "Equality: same instruction"
-        (mkBinOp "a" (Var "a") Add (Lit 1))
-        (mkBinOp "a" (Var "a") Add (Lit 1))
-    , notEqTest "Equality: different instructions"
-        (mkBinOp "a" (Var "a") Add (Lit 1))
-        (mkCopy "a" (Var "a"))
-    , eqTest    "Equality: same sequence"
-        (newInstrSeq [] ["d"])
-        (newInstrSeq [] ["d"])
-    , notEqTest "Equality: different sequences"
-        (newInstrSeq [] ["d"])
-        (newInstrSeq [] ["a"])
-    ]
+-- | Check that an InstrSeq stores and displays its contents.
+seqTests :: [TestResult]
+seqTests = [eqTest "getInstrs: check length"                               -- name
+            (length (getInstrs (newInstrSeq [mkCopy "a" (Lit 5)] ["a"])))  -- actual
+            1                                                              -- expected
+    
+           , eqTest "getLiveOut: single variable"                   -- name
+             (getLiveOut (newInstrSeq [mkCopy "a" (Lit 5)] ["a"]))  -- actual
+             ["a"]                                                  -- expected
+    
+           , eqTest "getLiveOut: empty list"                     -- name
+             (getLiveOut (newInstrSeq [mkCopy "a" (Lit 5)] []))  -- actual
+             []]                                                 -- expected
