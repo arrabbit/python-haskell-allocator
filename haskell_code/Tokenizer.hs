@@ -62,7 +62,7 @@ getType word
 --   *Note: A valid variable name is a single lowercase letter (not 't'),
 --          or 't' followed at least one digit.
 isValidVar :: String -> Bool
-isValidVar [c] = isAlpha c && c /= 't'                 -- single char (not 't')
+isValidVar [c] = isLower c && c /= 't'                 -- single char (not 't')
 isValidVar ('t':ds) = all isDigit ds && not (null ds)  -- 't' w. at least 1 digit
 isValidVar _ = False
 
