@@ -15,7 +15,7 @@ import Parser              (parse)
 import GraphBuilder        (buildGraph)
 import Allocator           (allocate)
 import Codegen             (generateCode)
-import TestUtils
+import TestMods.TestUtils
 
 
 -- | Runs all tests and prints results to the terminal
