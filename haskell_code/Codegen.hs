@@ -51,9 +51,7 @@ translateToAsmOp Mul = mkMul
 translateToAsmOp Div = mkDiv
 
 
--- ---------------------------------------------------------------------------
 -- Single-instruction translation
--- ---------------------------------------------------------------------------
 
 -- | Translate one three-address instruction to a list of assembly instructions.
 --   Binary operations produce two instructions (MOV then OP);
@@ -63,27 +61,27 @@ translateToAsmOp Div = mkDiv
 --   because it must have been assigned a register by the allocator.
 translateToAsm :: Instr -> ColourSol -> [AsmInstr]
 translateToAsm instr sol =
-    let destReg = mkRegister (fromJust (lookup (getDest instr) sol))
-        src1    = buildSrcOperand (getSrc1 instr) sol
-    in case instrType instr of
-        "binary" ->
-            -- a = b op c  =>  MOV b, Ra  /  OP c, Ra
-            let src2 = buildSrcOperand (fromJust (getSrc2 instr)) sol
-                op   = fromJust (getOp instr)
-            in [ mkMovToReg src1 destReg
-               , translateToAsmOp op src2 destReg ]
-        "unary"  ->
-            -- a = -b  =>  MOV #0, Ra  /  SUB b, Ra
-            [ mkMovToReg (immSrc 0) destReg
-            , mkSub src1 destReg ]
-        _        ->
-            -- a = b   =>  MOV b, Ra
-            [ mkMovToReg src1 destReg ]
+    case lookup (getDest instr) sol of
+        Nothing      -> []   
+        Just destIdx ->
+            let destReg = mkRegister destIdx
+                src1    = buildSrcOperand (getSrc1 instr) sol
+            in case instrType instr of
+                "binary" ->
+                    -- a = b op c  =>  MOV b, Ra  /  OP c, Ra
+                    let src2 = buildSrcOperand (fromJust (getSrc2 instr)) sol
+                        op   = fromJust (getOp instr)
+                    in [ mkMovToReg src1 destReg
+                       , translateToAsmOp op src2 destReg ]
+                "unary"  ->
+                    -- a = -b  =>  MOV #0, Ra  /  SUB b, Ra
+                    [ mkMovToReg (immSrc 0) destReg
+                    , mkSub src1 destReg ]
+                _        ->
+                    -- a = b   =>  MOV b, Ra
+                    [ mkMovToReg src1 destReg ]
 
-
--- ---------------------------------------------------------------------------
 -- Live-on-exit stores
--- ---------------------------------------------------------------------------
 
 -- | Build store-back instructions for variables that are live on exit.
 --   Each such variable's register value must be written back to memory so
@@ -98,16 +96,11 @@ buildStoreInstructions liveVars sol =
     , Just reg    <- [lookup name sol]
     ]
 
-
--- ---------------------------------------------------------------------------
--- Main entry point
--- ---------------------------------------------------------------------------
-
 -- | Generate an assembly program from a three-address instruction sequence
 --   and a register colouring.
 --
---   1. Emit assembly for every three-address instruction.
---   2. Append store-back instructions for variables live on exit.
+--   Emit assembly for every three-address instruction.
+--   Append store-back instructions for variables live on exit.
 generateCode :: InstrSeq -> ColourSol -> AsmProgram
 generateCode instrSeq sol =
     let body   = concatMap (`translateToAsm` sol) (getInstrs instrSeq)
