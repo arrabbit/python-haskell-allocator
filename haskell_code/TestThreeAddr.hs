@@ -34,7 +34,7 @@ runAllTests = showInstrTests ++ getterTests ++ seqTests
 -- Instruction tests
 -------------------------------------------------------
 
--- | Check that each instruction type displays correctly.
+-- | Checks that each instruction type displays correctly.
 showInstrTests :: [TestResult]
 showInstrTests = [strTest "showInstr: binary add"                  -- name
                   (showInstr (mkBinOp "a" (Var "a") Add (Lit 1)))  -- actual
@@ -60,7 +60,7 @@ showInstrTests = [strTest "showInstr: binary add"                  -- name
 -- Getter tests
 -------------------------------------------------------
 
--- | Check that the getter functions pull the right parts out.
+-- | Checks that the getter functions pull the right parts out.
 getterTests :: [TestResult]
 getterTests = [strTest "getDest: binary instruction"            -- name
                (getDest (mkBinOp "a" (Var "b") Add (Var "c")))  -- actual
@@ -94,7 +94,7 @@ getterTests = [strTest "getDest: binary instruction"            -- name
 -- InstrSeq tests
 -------------------------------------------------------
 
--- | Check that an InstrSeq stores and displays its contents.
+-- | Checks that an InstrSeq stores and displays its contents.
 seqTests :: [TestResult]
 seqTests = [eqTest "getInstrs: check length"                               -- name
             (length (getInstrs (newInstrSeq [mkCopy "a" (Lit 5)] ["a"])))  -- actual
