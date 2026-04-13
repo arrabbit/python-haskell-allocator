@@ -3,7 +3,7 @@
 --   generation for all three instruction types, all four operators,
 --   all source operand modes, and store-back behaviour.
 --
--- Authors: Joseph Mills
+-- Authors: Joseph Mills, Anna Running Rabbit, and Jordan Senko
 -- Date: April 11, 2026
 
 module TestMods.TestCodegen where
