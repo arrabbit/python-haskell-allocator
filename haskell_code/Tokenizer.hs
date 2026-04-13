@@ -32,7 +32,14 @@ tokenize input = concatMap tokenizeLn (lines input)
 --   Returns a list of tokens representing the parsed contents of the given
 --   line.
 tokenizeLn :: String -> [Token]
-tokenizeLn line = concatMap getType (words line) ++ [TokNewLn]
+tokenizeLn line = concatMap getType (words (addSpaces line)) ++ [TokNewLn]
+
+-- Adds spaces around operators so fused tokens like a=10 get split correctly.
+addSpaces :: String -> String
+addSpaces [] = []
+addSpaces (c:cs)
+    | c `elem` "=+-*/:," = " " ++ [c] ++ " " ++ addSpaces cs
+    | otherwise           = [c] ++ addSpaces cs
 
 -- | Evaluates a given string to determine its token type by matching the
 --   string to keyword 'live', key symbols (=, :, ,), mathematical operators

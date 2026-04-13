@@ -5,3 +5,4 @@ __pycache__/
 .DS_Store
 .claude/
 py_code/test_output/
+test_plan.md
