@@ -6,7 +6,7 @@
 -- Authors: Joseph Mills
 -- Date: April 12, 2026
 
-module TestMain where
+module TestMods.TestMain where
 
 import Data.List           (intercalate)
 
