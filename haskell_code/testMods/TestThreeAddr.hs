@@ -5,10 +5,10 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 -- Date: April 4, 2026
 
-module TestThreeAddr where
+module TestMods.TestThreeAddr where
 
 import ThreeAddr
-import TestUtils
+import TestMods.TestUtils
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()

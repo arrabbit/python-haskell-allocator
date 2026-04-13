@@ -6,11 +6,11 @@
 -- Authors: Joseph Mills
 -- Date: April 11, 2026
 
-module TestCodegen where
+module TestMods.TestCodegen where
 
 import Codegen   (generateCode)
 import ThreeAddr (newInstrSeq, mkBinOp, mkUnaryOp, mkCopy, Operand(..), Op(..))
-import TestUtils
+import TestMods.TestUtils
 
 -------------------------------------------------------
 -- All tests

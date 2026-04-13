@@ -5,10 +5,10 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 -- Date: April 1, 2026
 
-module TestAsmInstr where
+module TestMods.TestAsmInstr where
 
 import AsmInstr
-import TestUtils
+import TestMods.TestUtils
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()

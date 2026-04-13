@@ -6,7 +6,7 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 -- Date: April 2026
 
-module TestUtils 
+module TestMods.TestUtils 
     ( TestResult(..)
     , printResult
     , printAllResults

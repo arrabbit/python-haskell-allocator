@@ -5,12 +5,12 @@
 --  Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 --  Date: April 12, 2026
 
-module TestParser where
+module TestMods.TestParser where
 
 import Tokenizer
 import Parser
 import TestData
-import TestUtils 
+import TestMods.TestUtils 
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()
