@@ -12,8 +12,8 @@ import InterferenceGraph (IGraph, emptyGraph, addVariable, addEdge,
 import TestUtils         (TestResult, printAllResults, printSummary,
                           eqTest, boolTest, strTest)
 
-main :: IO ()
-main = do
+runTests :: IO ()
+runTests = do
     putStrLn "====================================="
     putStrLn " InterferenceGraph.hs - Test Results"
     putStrLn "====================================="

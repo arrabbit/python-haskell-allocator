@@ -9,8 +9,8 @@ import Variable  (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
 import TestUtils (TestResult, printAllResults, printSummary,
                   eqTest, boolTest, strTest)
 
-main :: IO ()
-main = do
+runTests :: IO ()
+runTests = do
     putStrLn "============================"
     putStrLn " Variable.hs - Test Results"
     putStrLn "============================"
