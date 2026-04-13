@@ -14,8 +14,8 @@ import ThreeAddr                  (Operand(..), Op(..), InstrSeq, Instr,
 import TestMods.TestUtils         (TestResult, printAllResults, printSummary,
                                    eqTest, boolTest)
 
-main :: IO ()
-main = do
+runTests :: IO ()
+runTests = do
     putStrLn "================================"
     putStrLn " GraphBuilder.hs - Test Results"
     putStrLn "================================"
