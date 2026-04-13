@@ -1,7 +1,7 @@
 -- Tests for InterferenceGraph.hs.
 -- Covers emptyGraph, addVariable, addEdge, getVariable, getVariables, showGraph.
 
-module TestIGraph where
+module TestMods.TestIGraph where
 
 import Data.List  (sort)
 import Data.Maybe (isJust, isNothing)

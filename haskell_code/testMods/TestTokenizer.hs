@@ -5,7 +5,7 @@
 --  Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 --  Date: April 12, 2026
 
-module TestTokenizer where
+module TestMods.TestTokenizer where
 
 import Tokenizer
 import TestUtils 

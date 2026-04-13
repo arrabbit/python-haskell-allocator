@@ -1,7 +1,7 @@
 -- Testing file for GraphBuilder.hs
 -- buildGraph of GraphBuilder takes an InstrSeq and produces an IGraph
 
-module TetsGraphBuilder where
+module TestMods.TestGraphBuilder where
 
 import Data.List (sort)
 import Data.Maybe (isJust, isNothing)

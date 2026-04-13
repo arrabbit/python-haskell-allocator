@@ -1,4 +1,4 @@
-module TestInterferenceGraph where
+module TestMods.TestInterferenceGraph where
 
 import Data.List  (sort)
 import Data.Maybe (isJust, isNothing, fromJust)

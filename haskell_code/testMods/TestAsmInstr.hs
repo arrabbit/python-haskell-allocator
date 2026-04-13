@@ -5,7 +5,7 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 -- Date: April 1, 2026
 
-module test_mods.TestAsmInstr where
+module TestMods.TestAsmInstr where
 
 import AsmInstr
 import TestUtils

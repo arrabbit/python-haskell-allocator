@@ -1,7 +1,7 @@
 -- Tests for Variable.hs
 -- Covers newVariable, getVarName, getAdjacent, addAdjacent, and Show
 
-module TestVariable where
+module TestMods.TestVariable where
 
 import Data.List (sort)
 

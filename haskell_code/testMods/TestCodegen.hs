@@ -6,7 +6,7 @@
 -- Authors: Joseph Mills
 -- Date: April 11, 2026
 
-module test_mods.TestCodegen where
+module TestMods.TestCodegen where
 
 import Codegen   (generateCode)
 import ThreeAddr (newInstrSeq, mkBinOp, mkUnaryOp, mkCopy, Operand(..), Op(..))
