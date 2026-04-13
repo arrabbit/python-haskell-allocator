@@ -28,6 +28,15 @@ This is a test.
 
 
 ### Run Any Module
+In order to run main you must enter the args and the test file path
+To Run main:
+    ghci Main.hs
+    :set args "<numargs>" "<filename.txt>"
+
+Example:
+ghci Main.hs
+ghci> :set args "4" "plain.txt"
+ghci> main
 To run any module, while in <u>haskell_code</u> directory, load with the
 command:
     ghci <moduleName>.hs
