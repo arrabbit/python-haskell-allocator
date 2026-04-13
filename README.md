@@ -34,7 +34,7 @@ command:
 
 ### Test Module Instructions
 To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestData.hs
+    ghci TestMods/TestData.hs
  To view three-address instruction sequences:
     ghci> putStr (showInstrSeq testSpecExample)
     ghci> putStr (showInstrSeq testBinary)
@@ -56,7 +56,7 @@ To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the comm
 
 To run any other test module, while in <u>haskell_code</u> directory, load with
 the command:
-    ghci <moduleName>.hs
+    ghci TestMod/<moduleName>.hs
     ghci> runTests
 
 
