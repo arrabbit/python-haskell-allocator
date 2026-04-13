@@ -4,7 +4,7 @@
 module TestIGraph where
 
 import Data.List  (sort)
-import Data.Maybe (isJust, isNothing)
+import Data.Maybe (isJust, isNothing) 
 
 import Variable          (getVarName, getAdjacent)
 import InterferenceGraph (IGraph, emptyGraph, addVariable, addEdge,
