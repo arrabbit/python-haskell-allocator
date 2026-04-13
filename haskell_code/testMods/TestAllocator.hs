@@ -9,7 +9,7 @@ module TestMods.TestAllocator where
 
 import Allocator
 import InterferenceGraph
-import TestUtils
+import TestMods.TestUtils
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()

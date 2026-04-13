@@ -9,7 +9,7 @@ import Data.Maybe (isJust, isNothing)
 import Variable          (getVarName, getAdjacent)
 import InterferenceGraph (IGraph, emptyGraph, addVariable, addEdge,
                           getVariables, getVariable, showGraph)
-import TestUtils         (TestResult, printAllResults, printSummary,
+import TestMods.TestUtils         (TestResult, printAllResults, printSummary,
                           eqTest, boolTest, strTest)
 
 main :: IO ()

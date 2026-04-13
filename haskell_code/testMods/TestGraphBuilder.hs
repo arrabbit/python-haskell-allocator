@@ -6,13 +6,13 @@ module TestMods.TestGraphBuilder where
 import Data.List (sort)
 import Data.Maybe (isJust, isNothing)
 
-import Variable          (getVarName, getAdjacent)
-import InterferenceGraph (IGraph, emptyGraph, getVariables, getVariable)
-import GraphBuilder      (buildGraph)
-import ThreeAddr         (Operand(..), Op(..), InstrSeq, Instr,
-                          mkBinOp, mkUnaryOp, mkCopy, newInstrSeq)
-import TestUtils         (TestResult, printAllResults, printSummary,
-                          eqTest, boolTest)
+import Variable                   (getVarName, getAdjacent)
+import InterferenceGraph          (IGraph, emptyGraph, getVariables, getVariable)
+import GraphBuilder               (buildGraph)
+import ThreeAddr                  (Operand(..), Op(..), InstrSeq, Instr,
+                                   mkBinOp, mkUnaryOp, mkCopy, newInstrSeq)
+import TestMods.TestUtils         (TestResult, printAllResults, printSummary,
+                                   eqTest, boolTest)
 
 main :: IO ()
 main = do

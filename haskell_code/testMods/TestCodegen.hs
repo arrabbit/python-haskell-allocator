@@ -10,7 +10,7 @@ module TestMods.TestCodegen where
 
 import Codegen   (generateCode)
 import ThreeAddr (newInstrSeq, mkBinOp, mkUnaryOp, mkCopy, Operand(..), Op(..))
-import TestUtils
+import TestMods.TestUtils
 
 -------------------------------------------------------
 -- All tests

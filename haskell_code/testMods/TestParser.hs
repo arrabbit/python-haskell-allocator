@@ -10,7 +10,7 @@ module TestMods.TestParser where
 import Tokenizer
 import Parser
 import TestData
-import TestUtils 
+import TestMods.TestUtils 
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()

@@ -8,7 +8,7 @@
 module TestMods.TestAsmInstr where
 
 import AsmInstr
-import TestUtils
+import TestMods.TestUtils
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()

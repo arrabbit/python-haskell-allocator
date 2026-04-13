@@ -8,7 +8,7 @@
 module TestMods.TestTokenizer where
 
 import Tokenizer
-import TestUtils 
+import TestMods.TestUtils 
 
 -- | Runs all tests and prints results to the terminal
 runTests :: IO ()
