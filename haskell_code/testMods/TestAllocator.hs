@@ -5,7 +5,7 @@
 --  Authors: Anna Running Rabbit, Jordan Senko, Joseph Mills
 --  Date: April 9, 2026
 
-module TestAllocator where
+module test_mods.TestAllocator where
 
 import Allocator
 import InterferenceGraph
