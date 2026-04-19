@@ -32,7 +32,14 @@ tokenize input = concatMap tokenizeLn (lines input)
 --   Returns a list of tokens representing the parsed contents of the given
 --   line.
 tokenizeLn :: String -> [Token]
-tokenizeLn line = concatMap getType (words line) ++ [TokNewLn]
+tokenizeLn line = concatMap getType (words (addSpaces line)) ++ [TokNewLn]
+
+-- Adds spaces around operators so fused tokens like a=10 get split correctly.
+addSpaces :: String -> String
+addSpaces [] = []
+addSpaces (c:cs)
+    | c `elem` "=+-*/:," = " " ++ [c] ++ " " ++ addSpaces cs
+    | otherwise           = [c] ++ addSpaces cs
 
 -- | Evaluates a given string to determine its token type by matching the
 --   string to keyword 'live', key symbols (=, :, ,), mathematical operators
@@ -46,12 +53,14 @@ getType ":" = [TokCol]
 getType "," = [TokCom]
 getType [o]
     | o `elem` "+-*/" = [TokOp o]
+getType ('-':rest)
+    | isValidVar rest = [TokOp '-', TokVar rest]  -- handles negative variable ex. '-a'
+    | isOnlyDigits rest = [TokOp '-', TokLit (read rest)] -- handles negative digit ex. '-2'
 getType word
     | isValidVar word = [TokVar word]
     | isOnlyDigits word = [TokLit (read word)]
     | last word == ',' && isValidVar (init word) = [TokVar (init word), TokCom]
-    | otherwise = error ("Tokenizer: invalid
-                          token: " ++ word)
+    | otherwise = error ("Tokenizer: invalid token: " ++ word)
 
 -- | Evaluates a given string to determine if it is a valid variable name.
 --   Returns True if the string is a valid variable name, otherwise returns
@@ -60,7 +69,7 @@ getType word
 --   *Note: A valid variable name is a single lowercase letter (not 't'),
 --          or 't' followed at least one digit.
 isValidVar :: String -> Bool
-isValidVar [c] = isAlpha c && c /= 't'                 -- single char (not 't')
+isValidVar [c] = isLower c && c /= 't'                 -- single char (not 't')
 isValidVar ('t':ds) = all isDigit ds && not (null ds)  -- 't' w. at least 1 digit
 isValidVar _ = False
 

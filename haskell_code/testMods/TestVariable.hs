@@ -1,12 +1,12 @@
 -- Tests for Variable.hs
 -- Covers newVariable, getVarName, getAdjacent, addAdjacent, and Show
 
-module TestVariable where
+module TestMods.TestVariable where
 
 import Data.List (sort)
 
 import Variable  (Variable, newVariable, getVarName, getAdjacent, addAdjacent)
-import TestUtils (TestResult, printAllResults, printSummary,
+import TestMods.TestUtils (TestResult, printAllResults, printSummary,
                   eqTest, boolTest, strTest)
 
 runTests :: IO ()
