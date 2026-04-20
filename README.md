@@ -31,7 +31,8 @@ This is a test.
 In order to run main you must enter the args and the test file path
 To Run main:
     ghci Main.hs
-    :set args "<numargs>" "<filename.txt>"
+    ghci> :set args <numargs> <filename.txt>
+    ghci> main
 
 Example:
 ghci Main.hs
