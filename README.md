@@ -83,6 +83,10 @@ To run `main.py`, while in <u>py_code</u> directory, run command:
     The name of the file you want to take as input into the compiler, including the file extension
     Ex. 'test.txt'
 
+### Test Module Instructions
+To run `test_all.py`, while in <u>py_code</u> directory, run with the command:
+    python .\test_drivers\test_all.py 
+
 ### Tool Files:
 To run `parser_module.py`, while in <u>py_code</u> directory, run command:
     python parser_module.py
