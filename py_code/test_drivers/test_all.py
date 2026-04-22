@@ -17,7 +17,7 @@ sys.path.insert(0, parent_dir)
 from tokenizer import TokenType, Token, Tokenizer
 from interm_rep import ThreeAdrInst, ThreeAdrInstList
 from parser import Parser
-from allocator import InterferenceGraph, build_interfere_graph, rename_vars, process_var
+from allocator import InterferenceGraph, build_interfere_graph
 from target import (AsmRegister, AsmVariable, AsmOperand, AsmOperandMode,
                     AsmOperator, AsmInst, AsmInstList)
 from generate import generate_assembly, make_operand
@@ -244,30 +244,32 @@ def test_allocator():
     code = p.parse()
     graph = build_interfere_graph(code)
     _check("build_interfere_graph: nodes exist", len(graph.graph) > 0)
-    # 46 — process_var: None returns None
-    _check("process_var(None) -> None", process_var(None, {}, {}) is None)
-    # 47 — process_var: digit string returns unchanged
-    _check("process_var('5') -> '5'", process_var("5", {}, {}) == "5")
     # 48 — InterferenceGraph.__str__ contains header and node names
     g5 = InterferenceGraph()
     g5.add_edge("x", "y")
     s = str(g5)
     _check("__str__ contains 'Interference Graph'", "Interference Graph" in s)
     _check("__str__ contains node name 'x'", "x" in s)
-    # 49 — rename_vars: variable defined twice gets distinct versions
-    lst_rv = ThreeAdrInstList()
-    lst_rv.add_instruct(ThreeAdrInst("b", "1"))
-    lst_rv.add_instruct(ThreeAdrInst("b", "2"))
-    lst_rv.set_live_on_exit([])
-    rename_vars(lst_rv)
-    _check("rename_vars: first def -> b_0", lst_rv.instructions[0].dest == "b_0")
-    _check("rename_vars: second def -> b_1", lst_rv.instructions[1].dest == "b_1")
-    # 50 — rename_vars: live-on-exit variable gets renamed to active version
-    lst_rv2 = ThreeAdrInstList()
-    lst_rv2.add_instruct(ThreeAdrInst("a", "1"))
-    lst_rv2.set_live_on_exit(["a"])
-    rename_vars(lst_rv2)
-    _check("rename_vars: live-on-exit 'a' renamed to 'a_0'", lst_rv2.live_on_exit == ["a_0"])
+    # 58 — build_interfere_graph preserves original variable names
+    #      (regression test: the allocator must not version-rename variables,
+    #      so the course-prescribed backward-traversal algorithm yields nodes
+    #      with the same names the user wrote in the source.)
+    tok2 = Tokenizer(os.path.join(TEST_INPUTS, "plain.txt"))
+    tok2.tokenize()
+    code2 = Parser(tok2.tokens).parse()
+    graph2 = build_interfere_graph(code2)
+    _check("no versioned names: 'a' is a node", "a" in graph2.graph)
+    _check("no versioned names: 'a_0' is NOT a node", "a_0" not in graph2.graph)
+    # 59 — build_interfere_graph handles a variable redefinition correctly:
+    #      when 'a' is redefined and the original and redefined values never
+    #      need to coexist, the single node 'a' appears (not split into a_0/a_1)
+    #      and the live-set bookkeeping handles the redefinition naturally.
+    tok3 = Tokenizer(os.path.join(TEST_INPUTS, "1binary_parse.txt"))
+    tok3.tokenize()
+    code3 = Parser(tok3.tokens).parse()
+    graph3 = build_interfere_graph(code3)
+    _check("redefinition handled: 'a' is a single node", "a" in graph3.graph)
+    _check("redefinition handled: no 'a_1' node", "a_1" not in graph3.graph)
 
 
 # ---------------------------------------------------------------------------
@@ -282,13 +284,11 @@ def _make_code_list(src: str):
 def test_generate():
     # 35 — binary op: MVR + arithmetic pair
     code = _make_code_list("a = b + c\nlive: a\n")
-    colour_map = {"a_0": 0, "b_0": 1, "c_0": 2}
-    from allocator import build_interfere_graph as _big
-    # Use a manually renamed code list to match what allocator produces
+    colour_map = {"a": 0, "b": 1, "c": 2}
     from interm_rep import ThreeAdrInst, ThreeAdrInstList
     lst = ThreeAdrInstList()
-    lst.add_instruct(ThreeAdrInst("a_0", "b_0", "+", "c_0"))
-    lst.set_live_on_exit(["a_0"])
+    lst.add_instruct(ThreeAdrInst("a", "b", "+", "c"))
+    lst.set_live_on_exit(["a"])
     asm = generate_assembly(lst, colour_map, 3)
     ops = [i.op for i in asm.instructions]
     _check("binary: first op is MVR", ops[0] == AsmOperator.MVR)
@@ -296,9 +296,9 @@ def test_generate():
 
     # 36 — unary negation: MVR #0 + SUB
     lst2 = ThreeAdrInstList()
-    lst2.add_instruct(ThreeAdrInst("x_0", "y_0", "-"))
+    lst2.add_instruct(ThreeAdrInst("x", "y", "-"))
     lst2.set_live_on_exit([])
-    colour_map2 = {"x_0": 0, "y_0": 1}
+    colour_map2 = {"x": 0, "y": 1}
     asm2 = generate_assembly(lst2, colour_map2, 2)
     ops2 = [i.op for i in asm2.instructions]
     _check("unary: produces 2 instructions", len(asm2.instructions) == 2)
@@ -307,18 +307,18 @@ def test_generate():
 
     # 37 — simple assignment: single MVR
     lst3 = ThreeAdrInstList()
-    lst3.add_instruct(ThreeAdrInst("z_0", "5"))
+    lst3.add_instruct(ThreeAdrInst("z", "5"))
     lst3.set_live_on_exit([])
-    colour_map3 = {"z_0": 0}
+    colour_map3 = {"z": 0}
     asm3 = generate_assembly(lst3, colour_map3, 1)
     _check("assignment: single MVR", len(asm3.instructions) == 1
            and asm3.instructions[0].op == AsmOperator.MVR)
 
     # 38 — live-on-exit appends MVD store
     lst4 = ThreeAdrInstList()
-    lst4.add_instruct(ThreeAdrInst("a_0", "5"))
-    lst4.set_live_on_exit(["a_0"])
-    colour_map4 = {"a_0": 0}
+    lst4.add_instruct(ThreeAdrInst("a", "5"))
+    lst4.set_live_on_exit(["a"])
+    colour_map4 = {"a": 0}
     asm4 = generate_assembly(lst4, colour_map4, 1)
     last_op = asm4.instructions[-1].op
     _check("live-on-exit: last inst is MVD", last_op == AsmOperator.MVD)
@@ -332,9 +332,9 @@ def test_generate():
            make_operand("c", {}).mode == AsmOperandMode.ABS)
     # 53 — generate_assembly with src from memory (not in colour_map) uses ABS mode
     lst5 = ThreeAdrInstList()
-    lst5.add_instruct(ThreeAdrInst("a_0", "c", "+", "b_0"))
+    lst5.add_instruct(ThreeAdrInst("a", "c", "+", "b"))
     lst5.set_live_on_exit([])
-    colour_map5 = {"a_0": 0, "b_0": 1}  # 'c' is a memory variable
+    colour_map5 = {"a": 0, "b": 1}  # 'c' is a memory variable
     asm5 = generate_assembly(lst5, colour_map5, 2)
     _check("memory src: MVR src mode is ABS",
            asm5.instructions[0].src.mode == AsmOperandMode.ABS)
