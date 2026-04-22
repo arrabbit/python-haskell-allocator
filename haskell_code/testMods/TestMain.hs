@@ -101,8 +101,12 @@ integrationTests =
         (not (null (allocate (buildGraph (parse (tokenize specInput))) 4)))
         True
 
-    , boolTest "Integration: spec example fails with 3 registers"
-        (null (allocate (buildGraph (parse (tokenize specInput))) 3))
+    , boolTest "Integration: spec example allocates with 3 registers"
+        (not (null (allocate (buildGraph (parse (tokenize specInput))) 3)))
+        True
+
+    , boolTest "Integration: spec example fails with 2 registers"
+        (null (allocate (buildGraph (parse (tokenize specInput))) 2))
         True
 
     , boolTest "Integration: empty program allocates with 1 register"
