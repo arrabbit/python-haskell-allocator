@@ -35,14 +35,13 @@ initialGraph liveOut =
 processInstr :: Instr -> ([String], IGraph) -> ([String], IGraph)
 processInstr instr (liveSet, graph) =
     let dest             = getDest instr
-        -- Collect Var names from source operands (ignore Lit operands)
         src1name         = varName (getSrc1 instr)
         src2name         = getSrc2 instr >>= varName
         srcNames         = [n | Just n <- [src1name, src2name]]
-        -- Step a: fold over source names, adding each new one to the live set
-        (liveSet', graph') = foldl addSrcVar (liveSet, graph) srcNames
-        -- Step b: the dest is defined here; it is not live above this point
-        liveSet''        = filter (/= dest) liveSet'
+        -- Step a: dest is defined here, so remove it BEFORE sources are added
+        liveSet'         = filter (/= dest) liveSet
+        -- Step b: fold over source names, adding each new one to the live set
+        (liveSet'', graph') = foldl addSrcVar (liveSet', graph) srcNames
     in  (liveSet'', graph')
 
 -- | If the variable is not already live, add it as a node, connect it to
