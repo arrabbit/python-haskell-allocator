@@ -3,14 +3,14 @@
 --   generation for all three instruction types, all four operators,
 --   all source operand modes, and store-back behaviour.
 --
--- Authors: Joseph Mills
+-- Authors: Joseph Mills, Anna Running Rabbit, and Jordan Senko
 -- Date: April 11, 2026
 
-module TestCodegen where
+module TestMods.TestCodegen where
 
 import Codegen   (generateCode)
 import ThreeAddr (newInstrSeq, mkBinOp, mkUnaryOp, mkCopy, Operand(..), Op(..))
-import TestUtils
+import TestMods.TestUtils
 
 -------------------------------------------------------
 -- All tests

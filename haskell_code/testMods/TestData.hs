@@ -6,7 +6,7 @@
 -- Authors: Anna Running Rabbit, Jordan Senko, and Joseph Mills
 -- Date: April 4, 2026
 
-module TestData where
+module TestMods.TestData where
 
 import ThreeAddr
 import AsmInstr

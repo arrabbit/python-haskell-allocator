@@ -14,7 +14,7 @@ from generate import generate_assembly
 import sys
 import os
 
-def gen_output(code_list, color, num_registers):
+def gen_output(code_list, color, num_registers, infile_name):
     """
     Generates assembly code from the IR list and writes it to an
     output file.
@@ -31,8 +31,7 @@ def gen_output(code_list, color, num_registers):
         asm = generate_assembly(code_list, color, num_registers)
         print("Assembly code generated successfully.")
 
-        output_dir = "test_output"
-        out_file_path = os.path.join(output_dir, "asm_out.s")
+        out_file_path = os.path.splitext(infile_name)[0] + ".s"
         with open(out_file_path, "w") as out_file:
             out_file.write(str(asm))
         print(f"Assembly code written to '{out_file_path}' successfully.")
@@ -144,7 +143,7 @@ def main():
     _validate_input_file(infile_name)
     code_list = _tokenize_and_parse(infile_name)
     color = _build_and_allocate(code_list, num_registers)
-    gen_output(code_list, color, num_registers)
+    gen_output(code_list, color, num_registers, infile_name)
 
 
 if __name__ == "__main__":

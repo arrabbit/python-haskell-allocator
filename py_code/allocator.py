@@ -123,10 +123,10 @@ def _init_live_vars(instruct_list, graph):
 
 def build_interfere_graph(instruct_list):
     """
-    Builds the interference graph from the given instruction list by updating
-    each variable name to be unique and then iterating through the instruction
-    list in reverse order, creating nodes for each live variable and connecting
-    the variables that interfere with each other.
+    Builds the interference graph from the given instruction list by
+    iterating through the instructions in reverse order, creating nodes
+    for each live variable and connecting the variables that interfere
+    with each other.
     Args:
         instruct_list: An instance of the ThreeAdrInstList containing the list
             of instructions and live variable information.
@@ -134,8 +134,6 @@ def build_interfere_graph(instruct_list):
         graph: An instance of the InterferenceGraph for the given instruction
             list.
     """
-    rename_vars(instruct_list)
-
     graph = InterferenceGraph()
     curr_live_vars = _init_live_vars(instruct_list, graph)
 
@@ -144,96 +142,6 @@ def build_interfere_graph(instruct_list):
         check_source_var(instr, graph, curr_live_vars)
 
     return graph
-
-def _rename_sources(instr, var_versions, active_names):
-    """Rename src1 and src2 of one instruction in-place."""
-    instr.src1 = process_var(instr.src1, var_versions, active_names)
-    instr.src2 = process_var(instr.src2, var_versions, active_names)
-
-
-def _rename_dest(instr, var_versions, active_names):
-    """
-    Assigns a new versioned name to the destination variable of one
-    instruction, updating the version and active name mappings.
-    Args:
-        instr: The ThreeAdrInst whose dest will be renamed.
-        var_versions: A dictionary mapping variable names to their
-            current version numbers.
-        active_names: A dictionary mapping variable names to their
-            active (renamed) names.
-    Returns:
-        None
-    """
-    if instr.dest:
-        curr = var_versions.get(instr.dest, -1)
-        new_version = curr + 1
-        var_versions[instr.dest] = new_version
-        new_name = f"{instr.dest}_{new_version}"
-        active_names[instr.dest] = new_name
-        instr.dest = new_name
-
-
-def _rename_live_on_exit(instruct_list, var_versions, active_names):
-    """
-    Renames the live-on-exit variables to match their final active (versioned)
-    names, updating the instruction list in place.
-    Args:
-        instruct_list: An instance of the ThreeAdrInstList whose live_on_exit
-            list will be updated.
-        var_versions: A dictionary mapping variable names to their current
-            version numbers.
-        active_names: A dictionary mapping variable names to their active
-            (renamed) names.
-    Returns:
-        None
-    """
-    new_live_on_exit = [process_var(var, var_versions, active_names)
-                        for var in instruct_list.live_on_exit]
-    instruct_list.set_live_on_exit(new_live_on_exit)
-
-
-def rename_vars(instruct_list):
-    """
-    Renames variables in the instruction list to ensure that each variable is
-    defined only once, which is a requirement for the interference graph
-    construction.
-    Args:
-        instruct_list: An instance of the ThreeAdrInstList containing the list
-            of instructions and live variable information.
-    """
-    var_versions = {}
-    active_names = {}
-
-    for instr in instruct_list.instructions:
-        _rename_sources(instr, var_versions, active_names)
-        _rename_dest(instr, var_versions, active_names)
-
-    _rename_live_on_exit(instruct_list, var_versions, active_names)
-
-def process_var(var_name, var_versions, active_names):
-    """
-    Checks if var_name is a valid variable (not None, not literal).
-    Initializes it if live-on-entry, and returns the current active
-    name.
-    Args:
-        var_name: The name of the variable to process.
-        var_versions: A dictionary mapping variable names to their
-            current version numbers.
-        active_names: A dictionary mapping variable names to their
-            active (renamed) names.
-    Returns:
-        str: The active (renamed) variable name, or the original
-            value if it is None or a literal.
-    """
-    if var_name and not var_name.isdigit(): # Ignore None and literals
-        # Check if variable is live on entry if so, initialize it to version 0
-        if var_name not in active_names:
-            var_versions[var_name] = 0
-            active_names[var_name] = f"{var_name}_0"
-        # Return the active name for use in instruction updates
-        return active_names[var_name]
-    
-    return var_name # Return original value if None or literal
 
 def check_dest_var(instr, graph, curr_live_vars):
     """

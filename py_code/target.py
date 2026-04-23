@@ -82,8 +82,8 @@ class AsmOperator(Enum):
     SUB = "SUB"             # SUB   src, Ri    
     MUL = "MUL"             # MUL   src, Ri
     DIV = "DIV"             # DIV   src, Ri
-    MVR = "MVR"             # MOV   src, Ri
-    MVD = "MVD"             # MOV   Ri, dst
+    MVR = "MOV"             # MOV   src, Ri
+    MVD = "MOV"             # MOV   Ri, dst
     
     def __str__(self):
         """

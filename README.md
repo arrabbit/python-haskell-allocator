@@ -25,25 +25,26 @@ This is a test.
 ```
 
 ## Haskell Solution Build Instructions
-### AsmInstr.hs
-To run `AsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci AsmInstr.hs
 
-### ThreeAddr.hs
-To run `ThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci ThreeAddr.hs
+
+### Run Any Module
+In order to run main you must enter the args and the test file path
+To Run main:
+    ghci Main.hs
+    ghci> :set args <numargs> <filename.txt>
+    ghci> main
+
+Example:
+ghci Main.hs
+ghci> :set args "4" "plain.txt"
+ghci> main
+To run any module, while in <u>haskell_code</u> directory, load with the
+command:
+    ghci <moduleName>.hs
 
 ### Test Module Instructions
-To run `TestAsmInstr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestAsmInstr.hs
-    ghci> runTests
-
-To run `TestThreeAddr.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestThreeAddr.hs
-    ghci> runTests
-
 To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ghci TestData.hs
+    ghci TestMods/TestData.hs
  To view three-address instruction sequences:
     ghci> putStr (showInstrSeq testSpecExample)
     ghci> putStr (showInstrSeq testBinary)
@@ -63,9 +64,10 @@ To run `TestData.hs`, while in <u>haskell_code</u> directory, load with the comm
     ghci> length (getInstrs testBinary)
     ghci> length (getInstrs testEmpty)
 
-To run `TestIGraph.hs`, while in <u>haskell_code</u> directory, load with the command:
-    ``` ghci
-        ghci> :l
+To run any other test module, while in <u>haskell_code</u> directory, load with
+the command:
+    ghci TestMod/<moduleName>.hs
+    ghci> runTests
 
 
 ## Imperative Solution Build Instructions
@@ -81,6 +83,10 @@ To run `main.py`, while in <u>py_code</u> directory, run command:
 - `file_name`:
     The name of the file you want to take as input into the compiler, including the file extension
     Ex. 'test.txt'
+
+### Test Module Instructions
+To run `test_all.py`, while in <u>py_code</u> directory, run with the command:
+    python .\test_drivers\test_all.py 
 
 ### Tool Files:
 To run `parser_module.py`, while in <u>py_code</u> directory, run command:
